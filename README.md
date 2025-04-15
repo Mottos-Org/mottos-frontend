@@ -11,6 +11,16 @@ Este es el frontend del proyecto **Mottos Web App**, desarrollado con Vue.js.
 
 ---
 
+## Variables de entorno
+
+En la raíz del proyecto, crear un archivo .env con las siguientes variables:
+
+```env
+VITE_API_URL=http://localhost:8000
+```
+
+Siendo `VITE_API_URL` el URL al backend
+
 ## 🚀 Iniciar el proyecto
 
 1. Instala las dependencias:
