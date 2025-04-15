@@ -4,13 +4,13 @@
         <p class="login-subtitle">
             ¡Bienvenido de nuevo! Por favor ingrese su nombre de usuario y contraseña para iniciar sesión.
         </p>
-    
+        
         <form @submit.prevent="handleLogin" class="login-form">
             <div class="form-group">
                 <label for="email">Correo Electrónico</label>
                 <input id="email" type="email" placeholder="Ingresa tu correo..." v-model="email" required />
             </div>
-    
+            
             <div class="form-group">
                 <label for="password">
                     <span>Contraseña</span>
@@ -18,23 +18,23 @@
                 </label>
                 <input id="password" type="password" placeholder="Ingresa tu contraseña..." v-model="password" required />
             </div>
-    
+            
             <div class="form-remember">
                 <input type="checkbox" id="rememberMe" v-model="rememberMe" />
                 <label for="rememberMe">Recordarme</label>
             </div>
-    
+            
             <button type="submit" class="submit-button">ACCESO</button>
             <span class="have-account">
                 <p>¿No tienes cuenta?</p>
                 <router-link to="/auth/register" class="forgot-link">Regístrate</router-link>
             </span>
         </form>
-    
+        
         <div class="divider">
             <span>INICIA SESIÓN CON</span>
         </div>
-    
+        
         <div class="social-buttons">
             <button class="social-button google">
                 <i class="fab fa-google"></i> Google
@@ -47,35 +47,36 @@
 </template>
 
 <script setup>
-import { motion } from 'motion-v'
-import { useToast } from 'vue-toastification';
+import axios from 'axios';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { useToast } from 'vue-toastification';
+import { useAuthStore } from '../../stores/authStore';
+import { showValidationErrors } from '../../utils/formatUtils';
 
-const toast = useToast();
+const baseUrl = import.meta.env.VITE_API_URL;
+const auth = useAuthStore();
 const router = useRouter();
+const toast = useToast();
 const email = ref('');
 const password = ref('');
 const rememberMe = ref(false);
 
 async function handleLogin() {
     try {
-        // const response = await api.post('/auth/login', {
-        //     email: email.value,
-        //     password: password.value,
-        // });
+        const response = await axios.post(`${baseUrl}/api/login`, {
+            email: email.value,
+            password: password.value,
+        });
 
-        // const { access_token, user } = response.data;
+        auth.setAuth(response.data);
+        toast.success('¡Has iniciado sesión exitosamente!');
+        router.push('/auth/mi-cuenta');
 
-        // localStorage.setItem('access_token', access_token);
-        // localStorage.setItem('user', JSON.stringify(user));
-
-        // Optionally route
-        router.push('/home');
-        toast.success('¡Bienvenido de nuevo!');
     } catch (error) {
-        console.error('Login error:', error.response?.data || error.message);
-        toast.error('Credenciales inválidas. Intenta de nuevo.');
+        console.error('Login error:', error);
+        const responseData = error.response?.data || {};
+        showValidationErrors(toast, responseData);
     }
 }
 </script>

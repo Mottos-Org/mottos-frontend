@@ -106,9 +106,16 @@
 
 <script setup>
 import { ref } from 'vue';
+import axios from 'axios';
 import { useToast } from 'vue-toastification';
+import { useRouter } from 'vue-router';
+import { showValidationErrors } from '../../utils/formatUtils'; // adjust path if needed
+import { useAuthStore } from '../../stores/authStore';
 
 const toast = useToast();
+const router = useRouter();
+const auth = useAuthStore();
+
 const nombre = ref('');
 const apellido = ref('');
 const telefono = ref('');
@@ -117,33 +124,39 @@ const password = ref('');
 const confirmPassword = ref('');
 const acceptTerms = ref(false);
 
+const api = axios.create({
+    baseURL: import.meta.env.VITE_API_URL,
+});
+
 async function handleRegister() {
+    if (!acceptTerms.value) {
+        toast.error('Debes aceptar los términos de uso.');
+        return;
+    }
+
     if (password.value !== confirmPassword.value) {
         toast.error('Las contraseñas no coinciden.');
         return;
     }
 
     try {
-        // const response = await api.post('/auth/register', {
-        //     nombre: nombre.value,
-        //     apellido: apellido.value,
-        //     telefono: telefono.value,
-        //     email: email.value,
-        //     password: password.value,
-        // });
+        const response = await api.post('/api/register/user', {
+            nombres: nombre.value,
+            apellidos: apellido.value,
+            telefono: telefono.value,
+            email: email.value,
+            password: password.value,
+        });
 
-        // const { access_token, user } = response.data;
-
-        // localStorage.setItem('access_token', access_token);
-        // localStorage.setItem('user', JSON.stringify(user));
-
-        router.push('/home');
+        auth.setAuth(response.data);
+        toast.success('¡Te has registrado exitosamente!');
+        router.push('/auth/mi-cuenta');
     } catch (error) {
-        console.error('Registro fallido:', error.response?.data || error.message);
-        toast.error('Hubo un error al crear la cuenta. Intenta más tarde.');
+        const errorResponse = error.response?.data;
+        console.error('Registro fallido:', errorResponse || error.message);
+        showValidationErrors(toast, errorResponse);
     }
 }
-
 </script>
 
 <style scoped>

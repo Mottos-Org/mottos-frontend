@@ -15,7 +15,22 @@
 <script setup>
 import { motion } from 'motion-v'
 import LoginForm from '../../components/forms/LoginForm.vue';
+import { useRouter } from 'vue-router';
+import { useToast } from 'vue-toastification';
+import { onMounted } from 'vue';
+import { useAuthStore } from '../../stores/authStore';
 
+const router = useRouter();
+const toast = useToast();
+const auth = useAuthStore();
+
+onMounted(async () => {
+    const isAuth = auth.isLoggedIn;
+    if (isAuth) {
+        toast.info('¡Ya estás autenticado! Cierra sesión para acceder con otro usuario.');
+        router.push('/auth/mi-cuenta');
+    }
+});
 </script>
 
 <style scoped>

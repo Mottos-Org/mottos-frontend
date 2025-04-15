@@ -36,49 +36,34 @@
     </nav>
 </template>
 
-
 <script setup>
-import { ref } from 'vue';
-import { motion } from 'motion-v'
+import { ref, computed } from 'vue';
+import { motion } from 'motion-v';
 import { useRoute } from 'vue-router';
+import { useAuthStore } from '../../stores/authStore';
 
+const auth = useAuthStore();
+const route = useRoute();
 const showMobileMenu = ref(false);
 
-const route = useRoute();
+const moduleLinks = ref([
+    { path: '/', label: 'INICIO' },
+    { path: '/motos', label: 'PUBLICACIONES' },
+    { path: '/contacto', label: 'CONTACTO' },
+]);
+
 const isActiveRoute = (path) => {
-    if (path === '/') {
-        return route.path === '/';
-    }
-    return route.path.startsWith(path);
+    return path === '/' ? route.path === '/' : route.path.startsWith(path);
 };
 
-const moduleLinks = ref([
-    {
-        path: '/',
-        label: 'INICIO',
-    },
-    {
-        path: '/motos',
-        label: 'PUBLICACIONES',
-    },
-    {
-        path: '/contacto',
-        label: 'CONTACTO',
-    }
-]);
-
-const authLinks = ref([
-    {
-        path: '/auth/login',
-        label: 'INICIAR SESIÓN',
-        highlight: false
-    },
-    {
-        path: '/auth/register',
-        label: 'REGISTRO',
-        highlight: false
-    }
-]);
+const authLinks = computed(() => {
+    return auth.isLoggedIn
+        ? [{ path: '/auth/mi-cuenta', label: 'MI CUENTA' }]
+        : [
+              { path: '/auth/login', label: 'INICIAR SESIÓN' },
+              { path: '/auth/register', label: 'REGISTRO' },
+          ];
+});
 </script>
 
 <style scoped>

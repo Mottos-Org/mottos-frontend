@@ -14,8 +14,8 @@ export const authRoutes = [
         component: Register
     },
     {
-        path: '/auth/me',
-        name: 'Me',
+        path: '/auth/mi-cuenta',
+        name: 'Mi cuenta',
         component: UserProfile
     }
 ]
