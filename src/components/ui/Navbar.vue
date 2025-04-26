@@ -60,9 +60,9 @@ const authLinks = computed(() => {
     return auth.isLoggedIn
         ? [{ path: '/auth/mi-cuenta', label: 'MI CUENTA' }]
         : [
-              { path: '/auth/login', label: 'INICIAR SESIÓN' },
-              { path: '/auth/register', label: 'REGISTRO' },
-          ];
+            { path: '/auth/login', label: 'INICIAR SESIÓN' },
+            { path: '/auth/register', label: 'REGISTRO' },
+        ];
 });
 </script>
 

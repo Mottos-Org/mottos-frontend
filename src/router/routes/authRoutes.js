@@ -16,6 +16,7 @@ export const authRoutes = [
     {
         path: '/auth/mi-cuenta',
         name: 'Mi cuenta',
-        component: UserProfile
+        component: UserProfile,
+        meta: { requiresAuth: true }
     }
 ]

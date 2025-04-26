@@ -68,15 +68,19 @@ async function handleLogin() {
             email: email.value,
             password: password.value,
         });
-
+        
         auth.setAuth(response.data);
         toast.success('¡Has iniciado sesión exitosamente!');
         router.push('/auth/mi-cuenta');
-
+    
     } catch (error) {
         console.error('Login error:', error);
-        const responseData = error.response?.data || {};
-        showValidationErrors(toast, responseData);
+        if (error.response?.status === 401) {
+            toast.error('Credenciales incorrectas.');
+        } else {
+            const responseData = error.response?.data.error || {};
+            showValidationErrors(toast, responseData);
+        }
     }
 }
 </script>

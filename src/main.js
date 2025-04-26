@@ -1,5 +1,7 @@
 import { createApp } from 'vue'
-import { createPinia } from 'pinia' // Import Pinia
+import { createPinia } from 'pinia' 
+import VueSelect from "vue-select";// Import Pinia
+
 import App from './App.vue'
 import router from './router/router'
 
@@ -22,5 +24,7 @@ const pinia = createPinia()
 app.use(pinia)
 app.use(router)
 app.use(Toast, toastOptions);
+
+app.component("v-select", VueSelect);
 
 app.mount('#app')

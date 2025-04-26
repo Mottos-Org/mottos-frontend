@@ -1,27 +1,40 @@
 <template>
-    <div>
-        <div class="text-center mb-4">
-            <img class="rounded-circle mb-2" src="https://via.placeholder.com/80" alt="Profile" />
-            <h5 class="fw-bold mb-0">Winston Pichardo</h5>
-            <small class="text-muted">winstonpichardo1420@gmail.com</small>
-            <button class="btn btn-outline-danger w-100 mt-3" @click="showConfirmLogout = true">
-                <i class="bi bi-box-arrow-left me-2"></i>Cerrar sesión
-            </button>
-        </div>
-        <hr />
+    <transition name="fade-expand">
         <div>
-            <h6 class="text-uppercase text-muted small fw-bold">Menú principal</h6>
-            <ul class="nav flex-column mt-3">
-                <li class="nav-item" v-for="tab in sidebarTabs" :key="tab.id">
-                    <a href="#" class="nav-link d-flex align-items-center" :class="{
-                        'active-tab': activeTab === tab.id
-                    }" @click.prevent="$emit('switch-tab', tab.id)">
-                        <i :class="tab.icon" class="me-2"></i> {{ tab.label }}
-                    </a>
-                </li>
-            </ul>
+            <motion.div :initial="{ opacity: 0, y: 30 }" :animate="{ opacity: 1, y: 0 }"
+                :exit="{ opacity: 0, y: 30 }" :transition="{ duration: 0.5 }">
+                <div v-if="loading" class="loader-container">
+                    <pulse-loader :loading="loading" color="#d63636" size="15px" />
+                </div>
+                <div v-else class="text-center mb-4">
+                    <img v-if="auth.user?.profile?.foto_perfil" :src="auth.user?.profile?.foto_perfil_url" alt="Foto de perfil"
+                        class="rounded-circle mb-2" style="width: 125px; height: 125px;" />
+                    <img v-else class="rounded-circle mb-2" src="/default_profile_pic.png" alt="Foto de perfil" style="width: 125px;"/>
+                    <h5 class="fw-bold mb-0">{{ auth.user?.user?.nombres }}</h5>
+                    <small class="text-muted" style="line-break: anywhere;">{{ auth.user?.user?.email }}</small>
+                    <button class="btn btn-outline-danger w-100 mt-3" @click="showConfirmLogout = true">
+                        <i class="bi bi-box-arrow-left me-2"></i>Cerrar sesión
+                    </button>
+                </div>
+            </motion.div>
+            <hr />
+            <motion.div :initial="{ opacity: 0, y: 30 }" :animate="{ opacity: 1, y: 0 }"
+                :exit="{ opacity: 0, y: 30 }" :transition="{ duration: 0.5 }">
+                <div>
+                    <h6 class="text-uppercase text-muted small fw-bold">Menú de Cuenta</h6>
+                    <ul class="nav flex-column mt-3">
+                        <li class="nav-item" v-for="tab in sidebarTabs" :key="tab.id">
+                            <a href="#" class="nav-link d-flex align-items-center" :class="{
+                                'active-tab': activeTab === tab.id
+                            }" @click.prevent="$emit('switch-tab', tab.id)">
+                                <i :class="tab.icon" class="me-2"></i> {{ tab.label }}
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </motion.div>
         </div>
-    </div>
+    </transition>
     <teleport to="body">
         <transition name="fade-modal">
             <div v-if="showConfirmLogout" class="modal-overlay">
@@ -44,10 +57,12 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import { useToast } from 'vue-toastification';
+import { motion } from 'motion-v'
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import { useToast } from 'vue-toastification';
 import { useAuthStore } from '../../stores/authStore';
+import PulseLoader from 'vue-spinner/src/PulseLoader.vue';
 
 defineProps({
     activeTab: String,
@@ -56,16 +71,17 @@ defineProps({
 const toast = useToast();
 const router = useRouter();
 const auth = useAuthStore();
-
 const showConfirmLogout = ref(false);
+const emit = defineEmits(['switch-tab']);
+const loading = ref(true);
 
 const sidebarTabs = [
-    { id: 'dashboard', label: 'Cuenta', icon: 'bi bi-person' },
+    { id: 'dashboard', label: 'Dashboard', icon: 'bi bi-clock-history' },
     { id: 'profile', label: 'Perfil', icon: 'bi bi-person-circle' },
-    { id: 'publications', label: 'Mis Publicaciones', icon: 'bi bi-motorcycle' },
-    { id: 'messages', label: 'Mensajes', icon: 'bi bi-envelope' },
+    { id: 'publications', label: 'Publicaciones', icon: 'fa fa-motorcycle' },
     { id: 'favorites', label: 'Favoritos', icon: 'bi bi-heart' },
-    { id: 'events', label: 'Eventos', icon: 'bi bi-calendar-event' },
+    { id: 'messages', label: 'Mensajes', icon: 'bi bi-envelope' },
+    { id: 'settings', label: 'Preferencias', icon: 'bi bi-gear' },
 ];
 
 function confirmLogout() {
@@ -74,9 +90,28 @@ function confirmLogout() {
     router.push('/auth/login');
     showConfirmLogout.value = false;
 }
+
+onMounted(async () => {
+    try {
+        await auth.fetchUserInfo();
+    } catch (error) {
+        toast.error('Error al obtener la información del usuario');
+        console.error(error);
+    } finally {
+        loading.value = false;
+    }
+});
 </script>
 
 <style scoped>
+.loader-container {
+    height: 100%;
+    min-height: 250px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 .nav-link {
     color: #333;
     padding: 0.5rem 1rem;
@@ -85,7 +120,8 @@ function confirmLogout() {
 }
 
 .nav-link:hover {
-    background-color: #f8f9fa;
+    background-color: #ebebebbe;
+    transition: all 0.3s ease;
 }
 
 .active-tab {
@@ -93,8 +129,14 @@ function confirmLogout() {
     color: white !important;
 }
 
-.active-tab i {
+.nav-link.active-tab:hover {
+    background-color: #d63636;
     color: white !important;
+}
+
+a:hover {
+    color: #d63636 !important;
+    transition: all 0.3s ease;
 }
 
 .modal-overlay {
@@ -195,5 +237,23 @@ function confirmLogout() {
 .fade-modal-leave-to {
     opacity: 0;
     transform: scale(0.95);
+}
+
+.fade-expand-enter-active,
+.fade-expand-leave-active {
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.fade-expand-enter-from,
+.fade-expand-leave-to {
+    max-height: 0;
+    opacity: 0;
+}
+
+.fade-expand-enter-to,
+.fade-expand-leave-from {
+    max-height: 500px;
+    opacity: 1;
 }
 </style>

@@ -6,6 +6,6 @@ export function showValidationErrors(toast, errorResponse) {
     } else if (errorResponse?.message) {
         toast.error(errorResponse.message);
     } else {
-        toast.error('Ha ocurrido un error inesperado.');
+        toast.error('Ha ocurrido un error, por favor intenta de nuevo más tarde.');
     }
 }
