@@ -30,7 +30,9 @@
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.2.1",
     "autoprefixer": "^10.4.21",
+    "laravel-echo": "^2.0.2",
     "postcss": "^8.5.3",
+    "pusher-js": "^8.4.0",
     "tailwindcss": "^4.1.1",
     "vite": "^6.2.0"
   }

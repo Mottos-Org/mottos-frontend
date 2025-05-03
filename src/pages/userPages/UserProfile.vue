@@ -14,7 +14,7 @@
                 </div>
 
                 <!-- Tab Content -->
-                <div class="tab-content bg-white p-4 rounded shadow-sm">
+                <div class="tab-content bg-white rounded shadow-sm">
                     <Transition name="fade" mode="out-in">
                         <component :is="getCurrentTabComponent()" />
                     </Transition>

@@ -14,6 +14,9 @@ import 'bootstrap-icons/font/bootstrap-icons.css'
 import Toast from 'vue-toastification'
 import 'vue-toastification/dist/index.css'
 
+import { initializeEcho } from './plugins/echo';
+import { useAuthStore } from './stores/authStore';
+
 const toastOptions = {
     position: 'top-right'
 };
@@ -26,5 +29,9 @@ app.use(router)
 app.use(Toast, toastOptions);
 
 app.component("v-select", VueSelect);
+
+const authStore = useAuthStore();
+const token = authStore.access || localStorage.getItem('access');
+initializeEcho(token);
 
 app.mount('#app')

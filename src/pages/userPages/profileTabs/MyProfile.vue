@@ -1,5 +1,5 @@
 <template>
-    <div class="content">
+    <div class="content" style="padding: 25px">
         <h4>Perfil</h4>
         <p class="text-muted" style="margin-top: -7.5px">Actualiza tu información aquí...</p>
 
@@ -32,12 +32,7 @@
 
             <div class="section">
                 <h6>Documentación</h6>
-
-                <div class="form-group">
-                    <label for="documento_de_identidad">Documento de Identidad</label>
-                    <input id="documento_de_identidad" v-model="profileData.documento_de_identidad" type="text" class="form-control" placeholder="Documento de identidad" />
-                </div>
-
+                
                 <div class="form-group">
                     <label for="tipo_documento_identidad">Tipo de Documento</label>
                     <v-select
@@ -46,6 +41,11 @@
                         placeholder="Seleccionar tipo de documento"
                         class="w-100"
                     />
+                </div>
+
+                <div class="form-group">
+                    <label for="documento_de_identidad">Documento de Identidad</label>
+                    <input id="documento_de_identidad" v-model="profileData.documento_de_identidad" type="text" class="form-control" placeholder="Documento de identidad" />
                 </div>
 
                 <div class="form-group">

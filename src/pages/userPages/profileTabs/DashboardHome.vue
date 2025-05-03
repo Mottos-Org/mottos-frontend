@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div style="padding: 25px">
         <div class="row g-4 mb-5">
             <div class="col-md-4" v-for="card in cards" :key="card.title">
                 <div class="card shadow-sm h-100">

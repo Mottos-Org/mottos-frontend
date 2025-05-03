@@ -1,5 +1,5 @@
 <template>
-    <div class="content">
+    <div class="content" style="padding: 25px">
         <h4>Preferencias</h4>
         <p class="text-muted" style="margin-top: -7.5px">Configura tus preferencias aquí.</p>
 
@@ -29,11 +29,11 @@
                         :reduce="unit => unit.id" placeholder="Seleccionar unidad métrica" class="w-100 mt-2" />
                 </div>
 
-                <div class="select-row">
+                <!-- <div class="select-row">
                     <label>Moneda preferida</label>
                     <v-select v-model="preferences.tipo_moneda_preferida_id" :options="currencies" label="name"
                         :reduce="currency => currency.id" placeholder="Seleccionar moneda" class="w-100 mt-2" />
-                </div>
+                </div> -->
             </div>
 
             <div class="btn-wrapper">
@@ -75,7 +75,7 @@ const preferences = ref({
     recibir_boletin_correo: 0,
     recibir_notificaciones: 0,
     unidad_metrica_preferida_id: null,
-    tipo_moneda_preferida_id: null
+    // tipo_moneda_preferida_id: null
 })
 
 const currencies = ref([])
@@ -119,7 +119,7 @@ const savePreferences = async () => {
         recibir_boletin_correo: preferences.value.recibir_boletin_correo ? 1 : 0,
         recibir_notificaciones: preferences.value.recibir_notificaciones ? 1 : 0,
         unidad_metrica_preferida_id: preferences.value.unidad_metrica_preferida_id,
-        tipo_moneda_preferida_id: preferences.value.tipo_moneda_preferida_id,
+        // tipo_moneda_preferida_id: preferences.value.tipo_moneda_preferida_id,
     };
 
     loading.value = true;
