@@ -54,9 +54,13 @@
                 </button>
                 <div class="chat-user-details">
                     <h4>{{ getSelectedChatName() }}</h4>
-                    <img v-if="conversations.find(c => c.user_id === selectedChatId)?.foto_perfil_url"
-                        :src="conversations.find(c => c.user_id === selectedChatId)?.foto_perfil_url" alt="Profile"
-                        class="profile-pic" style="height: 55px; width: 55px;" />
+                    <img
+                        :src="conversations.find(c => c.user_id === selectedChatId)?.foto_perfil_url || '/default_profile_pic.png'" 
+                        alt="Profile" 
+                        class="profile-pic" 
+                        style="height: 55px; width: 55px;" 
+                        @error="(e) => e.target.src = '/default_profile_pic.png'" 
+                    />
                 </div>
             </div>
 
