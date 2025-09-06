@@ -1,5 +1,10 @@
 import api from "../services/api";
 import { defineStore } from "pinia";
+import { useRouter } from "vue-router";
+import { useToast } from 'vue-toastification';
+
+const toast = useToast();
+const router = useRouter();
 
 export const useAuthStore = defineStore("auth", {
     state: () => ({
@@ -49,6 +54,16 @@ export const useAuthStore = defineStore("auth", {
                 this.user = res.data;
             } catch (err) {
                 console.error("Failed to fetch user details:", err);
+
+                if (err.response?.status === 401) {
+                    console.log("Token expired or invalid, logging out user");
+                    
+                    this.clearAuth();
+                    toast.warning("Tu sesión ha expirado. Por favor, inicia sesión de nuevo.");
+
+                    router.push({ name: "Login" });
+                }
+
                 throw err;
             }
         }
