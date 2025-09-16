@@ -13,10 +13,14 @@ export const useAuthStore = defineStore("auth", {
         // refresh: localStorage.getItem("refresh_token") || null,
         roles: JSON.parse(localStorage.getItem("roles") || "[]"),
         user: null,
+        verificationStatus: null,
     }),
     
     getters: {
         isLoggedIn: (state) => !!state.access,
+        isFullyVerified: (state) => state.verificationStatus?.verification_status?.fully_verified || false,
+        isEmailVerified: (state) => state.verificationStatus?.verification_status?.email_verified || false,
+        isDocumentoVerified: (state) => state.verificationStatus?.verification_status?.documento_verified || false,
     },
     
     actions: {
@@ -38,7 +42,8 @@ export const useAuthStore = defineStore("auth", {
             // this.refresh = null;
             this.roles = [];
             this.user = null;
-            
+            this.verificationStatus = null;
+
             localStorage.removeItem("access_token");
             // localStorage.removeItem("refresh_token");
             localStorage.removeItem("user_id");
@@ -66,6 +71,31 @@ export const useAuthStore = defineStore("auth", {
 
                 throw err;
             }
-        }
+        },
+
+        async fetchVerificationStatus() {
+            const userId = this.userId || localStorage.getItem("user_id");
+            if (!userId) {
+                console.warn("No user ID available for verification status check");
+                return null;
+            }
+            
+            try {
+                const res = await api.get(`/api/users/${userId}/verification-status`);
+                this.verificationStatus = res.data;
+                return res.data;
+            } catch (err) {
+                console.error("Failed to fetch verification status:", err);
+
+                if (err.response?.status === 401) {
+                    console.log("Token expired or invalid, logging out user");
+                    this.clearAuth();
+                    toast.warning("Tu sesión ha expirado. Por favor, inicia sesión de nuevo.");
+                    router.push({ name: "Login" });
+                }
+
+                throw err;
+            }
+        },
     },
 });

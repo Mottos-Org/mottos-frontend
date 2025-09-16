@@ -1,25 +1,33 @@
 <template>
     <transition name="fade-expand">
         <div>
-            <motion.div :initial="{ opacity: 0, y: 30 }" :animate="{ opacity: 1, y: 0 }"
-                :exit="{ opacity: 0, y: 30 }" :transition="{ duration: 0.5 }">
+            <motion.div :initial="{ opacity: 0, y: 30 }" :animate="{ opacity: 1, y: 0 }" :exit="{ opacity: 0, y: 30 }"
+                :transition="{ duration: 0.5 }">
                 <div v-if="loading" class="loader-container">
                     <pulse-loader :loading="loading" color="#d63636" size="15px" />
                 </div>
                 <div v-else class="text-center mb-4">
-                    <img v-if="auth.user?.profile?.foto_perfil" :src="auth.user?.profile?.foto_perfil_url" alt="Foto de perfil"
-                        class="rounded-circle mb-2" style="width: 125px; height: 125px;" />
-                    <img v-else class="rounded-circle mb-2" src="/default_profile_pic.png" alt="Foto de perfil" style="width: 125px;"/>
+                    <img v-if="auth.user?.profile?.foto_perfil" :src="auth.user?.profile?.foto_perfil_url"
+                        alt="Foto de perfil" class="rounded-circle mb-2" style="width: 125px; height: 125px;" />
+                    <img v-else class="rounded-circle mb-2" src="/default_profile_pic.png" alt="Foto de perfil"
+                        style="width: 125px;" />
                     <h5 class="fw-bold mb-0">{{ auth.user?.user?.nombres }}</h5>
                     <small class="text-muted" style="line-break: anywhere;">{{ auth.user?.user?.email }}</small>
+
+                    <div v-if="!auth.isFullyVerified" class="verification-pending-btn mt-3 mb-2"
+                        @click="$emit('switch-tab', 'verification')">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        Verificación pendiente
+                    </div>
+
                     <button class="btn btn-outline-danger w-100 mt-3" @click="showConfirmLogout = true">
                         <i class="bi bi-box-arrow-left me-2"></i>Cerrar sesión
                     </button>
                 </div>
             </motion.div>
             <hr />
-            <motion.div :initial="{ opacity: 0, y: 30 }" :animate="{ opacity: 1, y: 0 }"
-                :exit="{ opacity: 0, y: 30 }" :transition="{ duration: 0.5 }">
+            <motion.div :initial="{ opacity: 0, y: 30 }" :animate="{ opacity: 1, y: 0 }" :exit="{ opacity: 0, y: 30 }"
+                :transition="{ duration: 0.5 }">
                 <div>
                     <h6 class="text-uppercase text-muted small fw-bold">Menú de Cuenta</h6>
                     <ul class="nav flex-column mt-3">
@@ -94,6 +102,7 @@ function confirmLogout() {
 onMounted(async () => {
     try {
         await auth.fetchUserInfo();
+        await auth.fetchVerificationStatus();
     } catch (error) {
         toast.error('Error al obtener la información del usuario');
         console.error(error);
@@ -255,5 +264,29 @@ a:hover {
 .fade-expand-leave-from {
     max-height: 500px;
     opacity: 1;
+}
+
+.verification-pending-btn {
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(251, 191, 36, 0.3);
+}
+
+.verification-pending-btn:hover {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(251, 191, 36, 0.4);
+    transition: all 0.5s ease;
 }
 </style>

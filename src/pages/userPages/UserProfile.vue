@@ -33,6 +33,7 @@ import MyPublications from '@/pages/userPages/profileTabs/MyPublications.vue';
 import MyMessages from '@/pages/userPages/profileTabs/MyMessages.vue';
 import MyFavorites from '@/pages/userPages/profileTabs/MyFavorites.vue';
 import MyPreferences from './profileTabs/MyPreferences.vue';
+import AccountVerification from './profileTabs/AccountVerification.vue';
 
 const activeTab = ref('dashboard');
 
@@ -49,6 +50,7 @@ const tabs = [
     { id: 'messages', component: MyMessages },
     { id: 'favorites', component: MyFavorites },
     { id: 'settings', component: MyPreferences },
+    { id: 'verification', component: AccountVerification },
 ];
 
 const getCurrentTabComponent = () =>
