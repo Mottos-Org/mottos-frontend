@@ -48,7 +48,7 @@ const showMobileMenu = ref(false);
 
 const moduleLinks = ref([
     { path: '/', label: 'INICIO' },
-    { path: '/motos', label: 'PUBLICACIONES' },
+    { path: '/motos/publicaciones', label: 'PUBLICACIONES' },
     { path: '/contacto', label: 'CONTACTO' },
 ]);
 

@@ -1,6 +1,7 @@
 import NotFound from '../pages/NotFound.vue'
 import { useToast } from 'vue-toastification';
 import { authRoutes } from './routes/authRoutes'
+import { postRoutes } from './routes/postRoutes'
 import { useAuthStore } from '../stores/authStore'
 import { createRouter, createWebHistory } from 'vue-router'
 
@@ -8,6 +9,7 @@ const toast = useToast();
 
 const routes = [
     ...authRoutes,
+    ...postRoutes,
     { path: '/:pathMatch(.*)*', name: 'NotFound', component: NotFound },
 ]
 
