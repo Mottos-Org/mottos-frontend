@@ -11,6 +11,7 @@
             @click="$emit('load-more')" 
             :disabled="loading"
             class="btn btn-primary btn-lg"
+            style="background-color: #DC3545; border-color: #DC3545;"
         >
             <span v-if="loading" class="spinner-border spinner-border-sm me-2"></span>
             {{ loading ? 'Cargando...' : 'Cargar más publicaciones' }}
