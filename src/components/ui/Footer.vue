@@ -58,18 +58,7 @@
                     </ul>
                 </div>
                 <div class="footer-col newsletter">
-                    <h4>NEWSLETTER</h4>
-                    <p>
-                        ¡Únete a nuestro Newsletter y mantente al día con las mejores ofertas,
-                        eventos y noticias del mundo del motociclismo!
-                    </p>
-                    <div class="newsletter-signup">
-                        <input type="email" placeholder="Correo electrónico..." class="newsletter-input" />
-                        <button class="newsletter-button">
-                            <i class="fa fa-chevron-right"></i>
-                        </button>
-                    </div>
-                    <small class="newsletter-small">¡No te preocupes! No hacemos spam</small>
+                    <NewsletterSection />
                 </div>
             </div>
             <div class="footer-copy text-center">
@@ -80,6 +69,7 @@
 </template>
 
 <script setup>
+import NewsletterSection from '../forms/NewsletterSection.vue';
 </script>
 
 <style scoped>
