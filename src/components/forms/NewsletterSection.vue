@@ -119,7 +119,6 @@ const fetchUserEmail = async () => {
 
     try {
         const userDetails = await getUserDetails(auth.userId);
-        console.log('userDetails:', userDetails);
         return userDetails.email;
     } catch (error) {
         console.error('Error fetching user email:', error);

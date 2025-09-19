@@ -85,7 +85,7 @@ const metricUnits = ref([])
 const visibilityFields = {
     mostrar_telefono: "Mostrar mi número de teléfono",
     mostrar_correo: "Mostrar mi correo electrónico",
-    mostrar_ws: "Mostrar mi WhatsApp",
+    mostrar_ws: "Permitir que contacten mi WhatsApp",
 }
 const notificationFields = {
     recibir_boletin_correo: "Recibir boletín por correo",

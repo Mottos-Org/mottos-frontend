@@ -1,5 +1,5 @@
 <template>
-    <div class="publication-card">
+    <div class="publication-card" @click="goToDetails">
         <div class="card-hero">
             <div class="hero-content">
                 <div class="price-badge">
@@ -55,6 +55,9 @@
 </template>
 
 <script setup>
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
 
 const props = defineProps({
     publicacion: {
@@ -62,6 +65,13 @@ const props = defineProps({
         required: true
     }
 });
+
+const goToDetails = () => {
+    router.push({
+        name: 'PostDetails',
+        params: { id: props.publicacion.publicacion_id }
+    });
+};
 
 const formatPrice = (price) => {
     return new Intl.NumberFormat('es-DO', {
