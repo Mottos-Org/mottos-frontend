@@ -14,8 +14,8 @@
                     </p>
                 </div>
                 <div class="cta-buttons">
-                    <button class="info-btn">+ INFORMACIÓN</button>
-                    <button class="enter-btn">ENTRAR</button>
+                    <router-link to="/contact-us" @click="scrollToTop" class="info-btn">+ INFORMACIÓN</router-link>
+                    <button class="enter-btn" @click="handleEnterClick">ENTRAR</button>
                 </div>
             </div>
         </div>
@@ -36,25 +36,23 @@
                 <div class="footer-col">
                     <h4>SÍGUENOS</h4>
                     <ul>
-                        <li><a href="#">Instagram</a></li>
-                        <li><a href="#">TikTok</a></li>
+                        <li><a href="https://instagram.com/mottos.com.do" target="_blank" rel="noopener">Instagram</a></li>
+                        <li><a href="https://tiktok.com/@mottos.com.do" target="_blank" rel="noopener">TikTok</a></li>
                     </ul>
                 </div>
                 <div class="footer-col">
                     <h4>CONTACTO</h4>
                     <ul>
-                        <li><a href="#">Acerca de</a></li>
-                        <li><a href="#">Contacto</a></li>
-                        <li><a href="#">Publicidad</a></li>
+                        <li><router-link to="/about-us" @click="scrollToTop">Acerca de</router-link></li>
+                        <li><router-link to="/contact-us" @click="scrollToTop">Contacto</router-link></li>
                     </ul>
                 </div>
                 <div class="footer-col">
                     <h4>MOTTOS.COM.DO</h4>
                     <ul>
-                        <li><a href="#">Preguntas Frecuentes</a></li>
-                        <li><a href="#">Política de Privacidad</a></li>
-                        <li><a href="#">Términos y Condiciones</a></li>
-                        <li><a href="#">Ayuda</a></li>
+                        <li><router-link to="/faq" @click="scrollToTop">Preguntas Frecuentes</router-link></li>
+                        <li><router-link to="/politica-privacidad" @click="scrollToTop">Política de Privacidad</router-link></li>
+                        <li><router-link to="/terminos" @click="scrollToTop">Términos y Condiciones</router-link></li>
                     </ul>
                 </div>
                 <div class="footer-col newsletter">
@@ -69,11 +67,24 @@
 </template>
 
 <script setup>
+import { useRouter } from 'vue-router';
 import NewsletterSection from '../forms/NewsletterSection.vue';
+
+const router = useRouter();
+
+const scrollToTop = () => {
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+};
+
+const handleEnterClick = () => {
+    scrollToTop();
+};
 </script>
 
 <style scoped>
-
 .footer-top-cta {
     background-color: #8D0000;
     color: #fff;
@@ -120,7 +131,10 @@ import NewsletterSection from '../forms/NewsletterSection.vue';
     padding: 0.5rem 1rem;
     font-weight: 600;
     cursor: pointer;
-    transition: transform 0.2s;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+    border-radius: 4px;
 }
 
 .enter-btn {
@@ -130,7 +144,24 @@ import NewsletterSection from '../forms/NewsletterSection.vue';
 
 .info-btn:hover,
 .enter-btn:hover {
-    transform: scale(1.03);
+    transform: translateY(-2px) scale(1.02);
+    text-decoration: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.info-btn:hover {
+    color: #333;
+    background-color: #f8f9fa;
+}
+
+.enter-btn:hover {
+    color: #fff;
+    background-color: #34495e;
+}
+
+.info-btn:active,
+.enter-btn:active {
+    transform: translateY(0) scale(1);
 }
 
 .footer-mid-stats {
@@ -163,21 +194,6 @@ import NewsletterSection from '../forms/NewsletterSection.vue';
     color: #ccc;
 }
 
-.app-links {
-    display: flex;
-    gap: 1rem;
-}
-
-.store-badge {
-    height: 40px;
-    cursor: pointer;
-    transition: opacity 0.2s;
-}
-
-.store-badge:hover {
-    opacity: 0.8;
-}
-
 .footer-bottom {
     background-color: #1A1F28;
     padding: 2rem 1rem 1rem;
@@ -199,7 +215,6 @@ import NewsletterSection from '../forms/NewsletterSection.vue';
     text-align: left;
 }
 
-
 .footer-col h4 {
     margin-bottom: 1rem;
     font-size: 1rem;
@@ -219,68 +234,57 @@ import NewsletterSection from '../forms/NewsletterSection.vue';
     margin-bottom: 0.5rem;
 }
 
-.footer-col li a {
+.footer-col li a,
+.footer-col li .router-link-exact-active,
+.footer-col li .router-link-active {
     color: #99a3b6;
     text-decoration: none;
     font-size: 0.9rem;
-    transition: color 0.2s;
+    transition: all 0.3s ease;
+    padding: 0.25rem 0;
+    display: inline-block;
+    position: relative;
 }
 
-.footer-col li a:hover {
-    color: #960000;
+.footer-col li a:hover,
+.footer-col li .router-link-exact-active:hover,
+.footer-col li .router-link-active:hover {
+    color: #dc3545;
+    text-decoration: none;
+    transform: translateX(4px);
 }
 
-.newsletter p {
-    font-size: 0.9rem;
-    color: #99a3b6;
-    margin-bottom: 1rem;
-}
-
-.newsletter-signup {
-    display: flex;
+.footer-col li a:hover::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
     width: 100%;
-    max-width: 600px;
-    border: 1px solid #2c2f36;
-    background-color: #23272f;
+    height: 2px;
+    background-color: #dc3545;
+    transform: scaleX(1);
+    transition: transform 0.3s ease;
 }
 
-.newsletter-input {
-    flex: 1;
-    background-color: #23272f;
-    color: white;
-    border: none;
-    padding: 0.75rem 1rem;
-    font-size: 1rem;
-    outline: none;
+.footer-col li a::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
     width: 100%;
+    height: 2px;
+    background-color: #dc3545;
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
 }
 
-.newsletter-button {
-    background-color: #8b0000;
-    color: white;
-    padding: 0 1.5rem;
-    font-size: 1.25rem;
-    border: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background-color 0.2s;
-    box-sizing: border-box;
-    width: 100%;
-    max-width: 50px;
-    padding-inline: 0;
+.footer-col li .router-link-exact-active {
+    color: #dc3545;
+    font-weight: 600;
 }
 
-.newsletter-button:hover {
-    background-color: #b70000;
-}
-
-.newsletter-small {
-    font-size: 1rem;
-    font-style: italic;
-    color: #737f96;
-    margin-top: 0.5rem;
-    display: block;
+.footer-col li .router-link-exact-active::after {
+    transform: scaleX(1);
 }
 
 .footer-copy {
@@ -301,5 +305,71 @@ import NewsletterSection from '../forms/NewsletterSection.vue';
 
 .footer-copy a:hover {
     color: #ccc;
+}
+
+.router-link-active {
+    position: relative;
+}
+
+@media (max-width: 768px) {
+    .footer-top-container {
+        flex-direction: column;
+        text-align: center;
+        gap: 1.5rem;
+    }
+    
+    .cta-text h2 {
+        font-size: 1.4rem;
+    }
+    
+    .cta-buttons {
+        flex-direction: column;
+        width: 100%;
+        gap: 0.5rem;
+    }
+    
+    .info-btn,
+    .enter-btn {
+        width: 100%;
+        text-align: center;
+        padding: 0.75rem 1rem;
+    }
+    
+    .footer-mid-container {
+        flex-direction: column;
+        gap: 2rem;
+        text-align: center;
+    }
+    
+    .footer-bottom-container {
+        flex-direction: column;
+        gap: 2rem;
+    }
+    
+    .footer-col {
+        text-align: center;
+        min-width: auto;
+    }
+    
+    .footer-col li a:hover {
+        transform: none;
+    }
+}
+
+:global(html) {
+    scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .info-btn,
+    .enter-btn,
+    .footer-col li a {
+        transition: none;
+    }
+    
+    .info-btn:hover,
+    .enter-btn:hover {
+        transform: none;
+    }
 }
 </style>

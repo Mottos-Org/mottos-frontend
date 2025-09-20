@@ -196,6 +196,8 @@ const handleOptOut = async () => {
     }
 };
 
+// todo listen for WS to update subscription status in real-time
+
 // Lifecycle
 onMounted(async () => {
     if (auth.isLoggedIn && auth.userId) {

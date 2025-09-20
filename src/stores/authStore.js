@@ -10,7 +10,6 @@ export const useAuthStore = defineStore("auth", {
     state: () => ({
         userId: localStorage.getItem("user_id") || null,
         access: localStorage.getItem("access_token") || null,
-        // refresh: localStorage.getItem("refresh_token") || null,
         roles: JSON.parse(localStorage.getItem("roles") || "[]"),
         user: null,
         verificationStatus: null,
@@ -24,14 +23,16 @@ export const useAuthStore = defineStore("auth", {
     },
     
     actions: {
+        hasRole(role) {
+            return this.roles.some(roleObj => roleObj.nombre_rol === role);
+        },
+        
         setAuth({ user_id, access, roles }) {
             this.userId = user_id;
             this.access = access;
-            // this.refresh = refresh;
             this.roles = roles;
             
             localStorage.setItem("access_token", access);
-            // localStorage.setItem("refresh_token", refresh);
             localStorage.setItem("user_id", user_id);
             localStorage.setItem("roles", JSON.stringify(roles));
         },
@@ -39,13 +40,11 @@ export const useAuthStore = defineStore("auth", {
         clearAuth() {
             this.userId = null;
             this.access = null;
-            // this.refresh = null;
             this.roles = [];
             this.user = null;
             this.verificationStatus = null;
 
             localStorage.removeItem("access_token");
-            // localStorage.removeItem("refresh_token");
             localStorage.removeItem("user_id");
             localStorage.removeItem("roles");
         },

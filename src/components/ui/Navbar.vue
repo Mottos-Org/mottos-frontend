@@ -47,9 +47,9 @@ const route = useRoute();
 const showMobileMenu = ref(false);
 
 const moduleLinks = ref([
-    { path: '/', label: 'INICIO' },
     { path: '/motos/publicaciones', label: 'PUBLICACIONES' },
-    { path: '/contacto', label: 'CONTACTO' },
+    { path: '/noticias', label: 'NOTICIAS' },
+    { path: '/eventos', label: 'EVENTOS' },
 ]);
 
 const isActiveRoute = (path) => {

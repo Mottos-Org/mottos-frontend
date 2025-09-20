@@ -33,10 +33,6 @@
             </div>
 
             <div class="seller-details">
-                <div class="seller-detail">
-                    <i class="bi bi-geo-alt"></i>
-                    <span>{{ location }}</span>
-                </div>
 
                 <div v-if="shouldShowPhone" class="seller-detail">
                     <i class="bi bi-telephone"></i>
