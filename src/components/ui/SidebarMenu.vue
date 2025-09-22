@@ -85,11 +85,11 @@ const loading = ref(true);
 
 const sidebarTabs = [
     { id: 'dashboard', label: 'Dashboard', icon: 'bi bi-clock-history' },
-    { id: 'profile', label: 'Perfil', icon: 'bi bi-person-circle' },
-    { id: 'publications', label: 'Publicaciones', icon: 'fa fa-motorcycle' },
+    { id: 'profile', label: 'Información de Perfil', icon: 'bi bi-person-circle' },
+    { id: 'settings', label: 'Preferencias y Ajustes', icon: 'bi bi-gear' },
+    { id: 'publications', label: 'Mis Publicaciones', icon: 'fa fa-motorcycle' },
     { id: 'favorites', label: 'Favoritos', icon: 'bi bi-heart' },
     { id: 'messages', label: 'Mensajes', icon: 'bi bi-envelope' },
-    { id: 'settings', label: 'Preferencias', icon: 'bi bi-gear' },
 ];
 
 function confirmLogout() {
