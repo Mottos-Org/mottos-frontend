@@ -10,10 +10,11 @@
             <div class="row">
                 <div class="col-lg-8 col-md-12">
                     <ImageGallery
-                        :images="dummyImages"
+                        :images="postImages"
                         :current-image-index="currentImageIndex"
                         :title="postTitle"
                         :is-negotiable="post.negociable"
+                        :loading="imagesLoading"
                         @image-selected="currentImageIndex = $event"
                     />
 
@@ -24,6 +25,8 @@
                         :views-count="post.views_count"
                         :currency="post.tipo_moneda?.nombre_tipo_moneda"
                         :price="post.precio"
+                        :post-id="post.publicacion_id"
+                        :post-owner-id="post.user.user_id"
                     />
 
                     <div class="description-section">
@@ -157,14 +160,8 @@ const toast = useToast();
 const post = ref(null);
 const loading = ref(true);
 const currentImageIndex = ref(0);
-
-// Dummy images for now
-const dummyImages = ref([
-    'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&h=600&fit=crop',
-    'https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?w=800&h=600&fit=crop',
-    'https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=800&h=600&fit=crop',
-    'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&h=600&fit=crop'
-]);
+const postImages = ref([]);
+const imagesLoading = ref(false);
 
 const postTitle = computed(() => {
     if (!post.value) return '';
@@ -314,6 +311,8 @@ const fetchPostDetails = async () => {
         loading.value = true;
         const response = await api.get(`/api/publicaciones/details/${route.params.id}`);
         post.value = response.data.post;
+        
+        await fetchPostImages();
     } catch (error) {
         console.error('Error fetching post details:', error);
         if (error.response?.status === 404) {
@@ -323,6 +322,30 @@ const fetchPostDetails = async () => {
         }
     } finally {
         loading.value = false;
+    }
+};
+
+const fetchPostImages = async () => {
+    try {
+        imagesLoading.value = true;
+        const response = await api.get(`/api/publicaciones/${route.params.id}/images`);
+        
+        if (response.data.images && response.data.images.length > 0) {
+            // Sort images by display_order and extract URLs
+            const sortedImages = response.data.images
+                .sort((a, b) => a.display_order - b.display_order)
+                .map(image => image.url);
+            
+            postImages.value = sortedImages;
+        } else {
+            postImages.value = [];
+        }
+    } catch (error) {
+        console.error('Error fetching post images:', error);
+        postImages.value = [];
+        console.warn('Could not load post images, showing empty gallery');
+    } finally {
+        imagesLoading.value = false;
     }
 };
 

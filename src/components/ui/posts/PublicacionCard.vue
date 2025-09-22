@@ -1,6 +1,17 @@
 <template>
     <div class="publication-card" @click="goToDetails">
         <div class="card-hero">
+            <img 
+                v-if="publicacion.featured_image_url" 
+                :src="publicacion.featured_image_url" 
+                :alt="`${publicacion.marca_denorm} ${publicacion.modelo_denorm}`"
+                class="hero-image"
+                @error="handleImageError"
+                @load="handleImageLoad"
+            />
+            
+            <div class="image-overlay"></div>
+            
             <div class="hero-content">
                 <div class="price-badge">
                     <span v-if="publicacion.negociable" class="negotiable-tag">
@@ -10,7 +21,7 @@
                     <div class="price-text">
                         {{ publicacion.tipo_moneda?.nombre_tipo_moneda }} {{ formatPrice(publicacion.precio) }}
                     </div>
-                </div>````
+                </div>
                 
                 <div class="bike-info-overlay">
                     <h3 class="bike-title">{{ publicacion.marca_denorm }} {{ publicacion.modelo_denorm }}</h3>
@@ -20,6 +31,11 @@
                         <span class="displacement">{{ publicacion.bike?.displacement || 'N/A' }}</span>
                     </div>
                 </div>
+            </div>
+
+            <div v-if="!publicacion.featured_image_url" class="no-image-placeholder">
+                <i class="bi bi-camera"></i>
+                <span>Sin imagen</span>
             </div>
         </div>
 
@@ -55,9 +71,11 @@
 </template>
 
 <script setup>
+import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
+const imageError = ref(false);
 
 const props = defineProps({
     publicacion: {
@@ -65,6 +83,15 @@ const props = defineProps({
         required: true
     }
 });
+
+const handleImageError = () => {
+    imageError.value = true;
+    console.warn('Image failed to load:', props.publicacion.featured_image_url);
+};
+
+const handleImageLoad = () => {
+    imageError.value = false;
+};
 
 const goToDetails = () => {
     router.push({
@@ -107,6 +134,7 @@ const formatDate = (dateString) => {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     cursor: pointer;
     max-width: 425px;
+    min-width: 425px;
     text-align: left;
 }
 
@@ -117,30 +145,55 @@ const formatDate = (dateString) => {
 }
 
 .card-hero {
-    height: 200px;
-    background: linear-gradient(135deg, #000000 0%, #b70000 100%);
+    height: 240px;
     position: relative;
     overflow: hidden;
+    background: linear-gradient(135deg, #000000 0%, #b70000 100%);
 }
 
-.card-hero::before {
-    content: '';
+.hero-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center center;
+    transition: transform 0.3s ease;
+    z-index: 0;
+    image-rendering: crisp-edges;
+    image-rendering: -webkit-optimize-contrast;
+}
+
+.publication-card:hover .hero-image {
+    transform: scale(1.08);
+}
+
+.image-overlay {
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M20 20h60v60H20z' fill='none' stroke='rgba(255,255,255,0.1)' stroke-width='0.5'/%3E%3C/svg%3E");
-    opacity: 0.3;
+    background: linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 0.1) 0%,
+        rgba(0, 0, 0, 0.0) 25%,
+        rgba(0, 0, 0, 0.0) 65%,
+        rgba(0, 0, 0, 0.7) 100%
+    );
+    z-index: 1;
+    pointer-events: none;
 }
 
 .hero-content {
     position: relative;
     height: 100%;
-    padding: 16px;
+    padding: 20px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    z-index: 2;
 }
 
 .price-badge {
@@ -152,26 +205,28 @@ const formatDate = (dateString) => {
 }
 
 .negotiable-tag {
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.15);
     color: white;
-    padding: 4px 12px;
-    border-radius: 12px;
-    font-size: 14.5px;
-    font-weight: 500;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
     display: flex;
     justify-content: flex-end;
-    gap: 8px;
-    margin-bottom: 4px;
+    gap: 6px;
+    margin-bottom: 8px;
     width: fit-content;
     backdrop-filter: blur(10px);
     align-self: flex-end;
+    border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .price-text {
     color: white;
     font-size: 32px;
     font-weight: 700;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.8);
+    letter-spacing: -0.5px;
 }
 
 .bike-info-overlay {
@@ -179,22 +234,47 @@ const formatDate = (dateString) => {
 }
 
 .bike-title {
-    font-size: 20px;
+    font-size: 22px;
     font-weight: 700;
     margin-bottom: 8px;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.8);
+    line-height: 1.2;
 }
 
 .bike-details {
     display: flex;
     align-items: center;
-    gap: 8px;
-    font-size: 14px;
-    opacity: 0.9;
+    gap: 10px;
+    font-size: 15px;
+    font-weight: 500;
+    text-shadow: 0 1px 8px rgba(0, 0, 0, 0.8);
 }
 
 .separator {
-    opacity: 0.6;
+    opacity: 0.7;
+    font-weight: 300;
+}
+
+.no-image-placeholder {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    color: rgba(255, 255, 255, 0.6);
+    z-index: 1;
+}
+
+.no-image-placeholder i {
+    font-size: 2.5rem;
+}
+
+.no-image-placeholder span {
+    font-size: 14px;
+    font-weight: 500;
 }
 
 .card-content {
@@ -203,7 +283,7 @@ const formatDate = (dateString) => {
 
 .specs-row {
     display: flex;
-    gap: 16px;
+    gap: 12px;
     margin-bottom: 16px;
     flex-wrap: wrap;
 }
@@ -213,15 +293,21 @@ const formatDate = (dateString) => {
     align-items: center;
     gap: 6px;
     font-size: 13px;
-    color: #666;
-    background: #f8f9fa;
-    padding: 6px 12px;
+    font-weight: 500;
+    color: #555;
+    background: #f5f6f7;
+    padding: 8px 12px;
     border-radius: 20px;
+    transition: all 0.2s ease;
+}
+
+.spec-item:hover {
+    background: #eaebec;
 }
 
 .spec-item i {
     font-size: 14px;
-    color: #888;
+    color: #dc3545;
 }
 
 .spec-item.condition {
@@ -230,16 +316,16 @@ const formatDate = (dateString) => {
 }
 
 .spec-item.condition i {
-    color: #4caf50;
+    color: #28a745;
 }
 
 .description {
     color: #444;
     font-size: 14px;
-    line-height: 1.5;
+    line-height: 1.6;
     margin-bottom: 16px;
     display: -webkit-box;
-    /* -webkit-line-clamp: 2; */
+    -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
@@ -261,6 +347,7 @@ const formatDate = (dateString) => {
     font-weight: 600;
     font-size: 14px;
     color: #333;
+    margin-bottom: 2px;
 }
 
 .listing-date {
@@ -274,45 +361,79 @@ const formatDate = (dateString) => {
     gap: 4px;
     font-size: 12px;
     color: #666;
+    font-weight: 500;
 }
 
 .location i {
     font-size: 14px;
+    color: #dc3545;
 }
 
-.slide-fade-enter-active {
-    transition: all 0.3s ease-out;
+.publication-card:hover .image-overlay {
+    background: linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 0.05) 0%,
+        rgba(0, 0, 0, 0.0) 25%,
+        rgba(0, 0, 0, 0.0) 65%,
+        rgba(0, 0, 0, 0.6) 100%
+    );
 }
 
-.slide-fade-leave-active {
-    transition: all 0.3s cubic-bezier(1.0, 0.5, 0.8, 1.0);
+.publication-card:hover .price-text {
+    transform: scale(1.02);
 }
 
-.slide-fade-enter-from,
-.slide-fade-leave-to {
-    transform: translateY(-10px);
-    opacity: 0;
+.publication-card:hover .bike-title {
+    text-shadow: 0 3px 16px rgba(0, 0, 0, 0.9);
 }
 
 @media (max-width: 768px) {
+    .publication-card {
+        max-width: 100%;
+        min-width: 100%;
+    }
+    
     .publication-card:hover {
         transform: translateY(-4px);
     }
     
+    .publication-card:hover .hero-image {
+        transform: scale(1.04);
+    }
+    
+    .card-hero {
+        height: 200px;
+    }
+    
+    .hero-content {
+        padding: 16px;
+    }
+    
     .price-text {
-        font-size: 20px;
+        font-size: 26px;
     }
     
     .bike-title {
-        font-size: 18px;
+        font-size: 19px;
+    }
+    
+    .bike-details {
+        font-size: 14px;
     }
     
     .specs-row {
         gap: 8px;
     }
     
-    .details-grid {
-        grid-template-columns: 1fr;
+    .spec-item {
+        font-size: 12px;
+        padding: 6px 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .card-hero {
+        height: 180px;
     }
 }
 </style>

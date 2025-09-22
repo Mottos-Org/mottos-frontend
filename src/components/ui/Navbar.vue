@@ -8,7 +8,7 @@
                 @click="showMobileMenu = !showMobileMenu">
                 <i class="fas fa-bars"></i>
             </motion.button>
-            <div class="publish-btn desktop-only" style="margin-right: 7.5%">
+            <div class="publish-btn desktop-only" style="margin-right: 7.5%" @click="$router.push('/motos/publicacion/crear')">
                 <i class="icon-moto fa fa-motorcycle"></i>
                 <h2>PUBLICA TU MOTO</h2>
             </div>

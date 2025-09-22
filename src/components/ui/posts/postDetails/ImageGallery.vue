@@ -1,32 +1,61 @@
 <template>
     <div class="image-gallery">
-        <div class="main-image" @click="openModal">
-            <img :src="currentImage" :alt="title" />
-            <div v-if="isNegotiable" class="negotiable-badge">
-                Negociable
-            </div>
-            <div class="enlarge-hint">
-                <i class="bi bi-arrows-fullscreen"></i>
-                <span>Click para ampliar</span>
+        <div v-if="loading" class="gallery-loading">
+            <div class="loading-content">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Cargando imágenes...</span>
+                </div>
+                <p>Cargando imágenes...</p>
             </div>
         </div>
-        <div class="image-thumbnails">
-            <div 
-                v-for="(image, index) in images" 
-                :key="index"
-                class="thumbnail"
-                :class="{ active: currentImageIndex === index }"
-                @click="$emit('imageSelected', index)"
-            >
-                <img :src="image" :alt="`Imagen ${index + 1}`" />
+
+        <div v-else-if="!images.length" class="no-images-state">
+            <div class="no-images-content">
+                <i class="bi bi-camera"></i>
+                <h4>Sin imágenes disponibles</h4>
+                <p>Esta publicación no tiene imágenes cargadas</p>
+                <div v-if="isNegotiable" class="negotiable-badge">
+                    Negociable
+                </div>
             </div>
         </div>
+
+        <template v-else>
+            <div class="main-image" @click="openModal">
+                <img :src="currentImage" :alt="title" />
+                <div v-if="isNegotiable" class="negotiable-badge">
+                    Negociable
+                </div>
+                <div class="enlarge-hint">
+                    <i class="bi bi-arrows-fullscreen"></i>
+                    <span>Click para ampliar</span>
+                </div>
+            </div>
+            
+            <div v-if="images.length > 1" class="image-thumbnails">
+                <div 
+                    v-for="(image, index) in images" 
+                    :key="index"
+                    class="thumbnail"
+                    :class="{ active: currentImageIndex === index }"
+                    @click="$emit('imageSelected', index)"
+                >
+                    <img :src="image" :alt="`Imagen ${index + 1}`" />
+                </div>
+            </div>
+            
+            <div v-else class="single-image-indicator">
+                <span class="image-counter">
+                    <i class="bi bi-image"></i>
+                    1 imagen
+                </span>
+            </div>
+        </template>
     </div>
 
-    <!-- Image Modal -->
     <teleport to="body">
         <transition name="modal-fade">
-            <div v-if="showModal" class="image-modal-overlay" @click="closeModal">
+            <div v-if="showModal && images.length" class="image-modal-overlay" @click="closeModal">
                 <div class="image-modal-container" @click.stop>
                     <button class="modal-close-btn" @click="closeModal">
                         <i class="bi bi-x-lg"></i>
@@ -101,23 +130,33 @@ const props = defineProps({
     isNegotiable: {
         type: Boolean,
         default: false
+    },
+    loading: {
+        type: Boolean,
+        default: false
     }
 });
 
 const emit = defineEmits(['imageSelected']);
 const showModal = ref(false);
 const currentModalIndex = ref(0);
-const currentImage = computed(() => props.images[props.currentImageIndex]);
+
+const currentImage = computed(() => {
+    if (!props.images.length) return '';
+    return props.images[props.currentImageIndex] || props.images[0];
+});
 
 const openModal = () => {
+    if (!props.images.length) return;
+    
     currentModalIndex.value = props.currentImageIndex;
     showModal.value = true;
-    document.body.style.overflow = 'hidden'; // Prevent background scrolling
+    document.body.style.overflow = 'hidden';
 };
 
 const closeModal = () => {
     showModal.value = false;
-    document.body.style.overflow = ''; // Restore scrolling
+    document.body.style.overflow = '';
     emit('imageSelected', currentModalIndex.value);
 };
 
@@ -155,7 +194,7 @@ onMounted(() => {
 
 onUnmounted(() => {
     document.removeEventListener('keydown', handleKeydown);
-    document.body.style.overflow = ''; // Cleanup
+    document.body.style.overflow = '';
 });
 </script>
 
@@ -166,6 +205,75 @@ onUnmounted(() => {
     overflow: hidden;
     margin-bottom: 20px;
     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.gallery-loading {
+    height: 400px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f8f9fa;
+}
+
+.loading-content {
+    text-align: center;
+    color: #6c757d;
+}
+
+.loading-content p {
+    margin-top: 1rem;
+    font-size: 14px;
+}
+
+.no-images-state {
+    height: 400px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    position: relative;
+}
+
+.no-images-content {
+    text-align: center;
+    color: #6c757d;
+    padding: 2rem;
+}
+
+.no-images-content i {
+    font-size: 4rem;
+    color: #adb5bd;
+    margin-bottom: 1rem;
+}
+
+.no-images-content h4 {
+    color: #495057;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.no-images-content p {
+    font-size: 14px;
+    margin: 0;
+}
+
+.single-image-indicator {
+    padding: 12px 16px;
+    background: #f8f9fa;
+    text-align: center;
+}
+
+.single-image-indicator .image-counter {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: #6c757d;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.single-image-indicator .image-counter i {
+    color: #dc3545;
 }
 
 .main-image {
@@ -224,6 +332,7 @@ onUnmounted(() => {
     gap: 8px;
     padding: 16px;
     background: #f8f9fa;
+    overflow-x: auto;
 }
 
 .thumbnail {
@@ -234,6 +343,7 @@ onUnmounted(() => {
     cursor: pointer;
     border: 2px solid transparent;
     transition: border-color 0.2s;
+    flex-shrink: 0;
 }
 
 .thumbnail.active {
@@ -422,49 +532,26 @@ onUnmounted(() => {
 }
 
 @media (max-width: 768px) {
-    .image-modal-container {
-        width: 100%;
-        height: 100%;
+    .no-images-content {
+        padding: 1.5rem;
     }
     
-    .modal-image-wrapper {
-        margin: 60px 10px 10px 10px;
+    .no-images-content i {
+        font-size: 3rem;
     }
     
-    .modal-nav-btn {
-        width: 45px;
-        height: 45px;
-        font-size: 18px;
+    .no-images-content h4 {
+        font-size: 1.1rem;
     }
     
-    .prev-btn {
-        left: 10px;
+    .image-thumbnails {
+        padding: 12px;
+        gap: 6px;
     }
     
-    .next-btn {
-        right: 10px;
-    }
-    
-    .modal-close-btn {
-        top: 15px;
-        right: 15px;
-        width: 40px;
-        height: 40px;
-    }
-    
-    .modal-thumbnails {
-        padding: 15px 10px;
-    }
-    
-    .modal-thumbnail {
-        width: 50px;
-        height: 38px;
-    }
-}
-
-@media (hover: none) and (pointer: coarse) {
-    .enlarge-hint {
-        display: none;
+    .thumbnail {
+        width: 70px;
+        height: 50px;
     }
 }
 </style>
