@@ -21,7 +21,7 @@
                 </div>
                 <div class="seller-info">
                     <h4 class="seller-name">{{ seller.nombres }} {{ seller.apellidos }}</h4>
-                    <div v-if="sellerVerificationStatus?.isFullyVerified" class="seller-verification">
+                    <div v-if="sellerVerificationStatus?.verification_status?.fully_verified" class="seller-verification">
                         <i class="bi bi-check-circle"></i>
                         <span>Usuario verificado</span>
                     </div>
@@ -119,7 +119,7 @@ onMounted(async () => {
         loading.value = true;
         sellerUser.value = await authUtils.fetchUserDetails(props.seller.user_id);
         sellerVerificationStatus.value = await authUtils.fetchUserVerificationStatus(props.seller.user_id);
-        
+
         setProfileImage();
         
     } catch (error) {
