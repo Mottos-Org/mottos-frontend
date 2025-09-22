@@ -495,6 +495,7 @@ const getStatusText = () => {
     
     .hero-content {
         padding: 12px;
+        text-align: left;
     }
     
     .price-text {
@@ -512,6 +513,10 @@ const getStatusText = () => {
     .btn-sm {
         padding: 4px 8px;
         font-size: 0.75rem;
+    }
+
+    .my-publication-card {
+        min-width: 100%;
     }
 }
 </style>
