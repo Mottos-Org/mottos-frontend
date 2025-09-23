@@ -7,6 +7,8 @@
                 <span>{{ viewsCount }} {{ viewsCount === 1 ? 'vista' : 'vistas' }}</span>
             </div>
 
+            <PublicacionCardFavorite :post-id="postId" :post-owner-id="postOwnerId" />
+
             <div v-if="canEdit" class="action-buttons">
                 <button @click="handleEdit" class="btn btn-edit">
                     <i class="bi bi-pencil-square"></i>
@@ -54,6 +56,7 @@
 import { computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../../../../stores/authStore';
+import PublicacionCardFavorite from '../PublicacionCardFavorite.vue';
 
 const props = defineProps({
     title: String,
