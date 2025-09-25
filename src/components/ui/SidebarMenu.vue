@@ -85,6 +85,7 @@ const loading = ref(true);
 
 const sidebarTabs = [
     { id: 'dashboard', label: 'Dashboard', icon: 'bi bi-clock-history' },
+    { id: 'my-garage', label: 'Mis Motos', icon: 'fa-solid fa-warehouse' },
     { id: 'profile', label: 'Información de Perfil', icon: 'bi bi-person-circle' },
     { id: 'settings', label: 'Preferencias y Ajustes', icon: 'bi bi-gear' },
     { id: 'publications', label: 'Mis Publicaciones', icon: 'fa fa-motorcycle' },
