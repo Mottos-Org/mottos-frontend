@@ -326,37 +326,33 @@ const loadMore = async () => {
 };
 
 const handleEdit = (bike) => {
-    console.log('🔧 Editing bike:', bike.bike_id);
     bikeToEdit.value = bike;
     showEditBikeModal.value = true;
 };
 
 const handleDelete = (bike) => {
-    console.log('🗑️ Preparing to delete bike:', bike.bike_id);
     bikeToDelete.value = bike;
     showDeleteModal.value = true;
 };
 
 const handleSell = (bike) => {
-    console.log('💰 Redirecting to sell bike:', bike.bike_id);
-    router.push('/motos/publicacion/crear');
+    router.push('/motos/publicacion/crear?bikeId=' + bike.bike_id);
 };
 
 const handleViewDetails = (bike) => {
-    console.log('👁️ Viewing bike details:', bike.bike_id);
-    // TODO: Navigate to bike details page when implemented
-    toast.info('Vista de detalles próximamente');
+    router.push({ 
+        name: 'MyBikeDetails', 
+        params: { id: bike.bike_id } 
+    });
 };
 
 const handleBikeCreated = async (newBike) => {
-    console.log('✅ New bike created:', newBike);
     showCreateBikeModal.value = false;
     toast.success('¡Motocicleta agregada exitosamente!');
     await fetchBikes();
 };
 
 const handleBikeUpdated = async (updatedBike) => {
-    console.log('✅ Bike updated:', updatedBike);
     showEditBikeModal.value = false;
     bikeToEdit.value = null;
     toast.success('¡Motocicleta actualizada exitosamente!');
@@ -401,8 +397,6 @@ watch(sortBy, (newSort) => {
 });
 
 onMounted(async () => {
-    console.log('🚀 MyGarage component mounted');
-    console.log('👤 User ID:', auth.userId);
     await fetchBikes();
 });
 </script>

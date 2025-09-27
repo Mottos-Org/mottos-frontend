@@ -120,8 +120,8 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted, nextTick } from 'vue';
-import { useRouter } from 'vue-router';
+import { ref, reactive, computed, onMounted, nextTick, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import { useToast } from 'vue-toastification';
 import { useAuthStore } from '../../../stores/authStore';
 import api from '../../../services/api';
@@ -144,6 +144,7 @@ const props = defineProps({
 });
 
 const router = useRouter();
+const route = useRoute();
 const toast = useToast();
 const auth = useAuthStore();
 
@@ -439,6 +440,17 @@ const handleImageChanges = async (publicacionId) => {
     }
 };
 
+const autoSelectBikeFromQuery = () => {
+    const bikeIdFromQuery = route.query.bikeId;
+    
+    if (bikeIdFromQuery && userBikes.value.length > 0) {
+        const found = userBikes.value.find(bike => String(bike.bike_id) === String(bikeIdFromQuery));
+        if (found) {
+            selectedBike.value = found;
+        }
+    }
+};
+
 onMounted(async () => {
     if (!auth.isLoggedIn) {
         router.push('/auth/login');
@@ -446,11 +458,13 @@ onMounted(async () => {
     }
     
     await loadUserBikes();
+    autoSelectBikeFromQuery();
     
     if (props.isEditing) {
         await loadPostData();
     }
 });
+
 </script>
 
 <style scoped>

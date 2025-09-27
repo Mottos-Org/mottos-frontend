@@ -4,6 +4,7 @@ import { authRoutes } from './routes/authRoutes'
 import { postRoutes } from './routes/postRoutes'
 import { newsRoutes } from './routes/newsRoutes'
 import { docRoutes } from './routes/docRoutes';
+import { bikeRoutes } from './routes/bikeRoutes';
 import { useAuthStore } from '../stores/authStore'
 import { createRouter, createWebHistory } from 'vue-router'
 
@@ -14,6 +15,7 @@ const routes = [
     ...postRoutes,
     ...newsRoutes,
     ...docRoutes,
+    ...bikeRoutes,
     { path: '/:pathMatch(.*)*', name: 'NotFound', component: NotFound },
 ]
 

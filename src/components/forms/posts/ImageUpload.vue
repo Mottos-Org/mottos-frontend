@@ -170,7 +170,6 @@ onMounted(() => {
         }));
         
         featuredImageIndex.value = props.featuredIndex;
-        console.log('Initialized with existing images:', selectedImages.value);
     }
 });
 
@@ -187,7 +186,6 @@ watch(() => props.images, (newImages) => {
         }));
         
         featuredImageIndex.value = props.featuredIndex;
-        console.log('Updated with new props images:', selectedImages.value);
     }
 }, { immediate: true });
 
@@ -305,7 +303,6 @@ const removeImage = async (index) => {
 
 const setFeaturedImage = (index) => {
     featuredImageIndex.value = index;
-    console.log(`Featured image set to index: ${index} (1-based: ${index + 1})`);
     emitUpdate();
 };
 
@@ -331,7 +328,6 @@ const emitUpdate = () => {
         featuredIndex: featuredImageIndex.value
     };
     
-    console.log('Emitting image update:', updateData);
     emit('update-images', updateData);
 };
 </script>

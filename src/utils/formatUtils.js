@@ -22,3 +22,18 @@ export function formatPhoneNumber(phone) {
 
     return phone;
 }
+
+export const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString('es-DO', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
+};
+
+export const formatJoinDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString('es-DO', {
+        year: 'numeric',
+        month: 'long'
+    });
+};
