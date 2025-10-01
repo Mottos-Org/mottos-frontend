@@ -1,154 +1,245 @@
 <template>
-    <div style="padding: 25px">
-        <div class="row g-4 mb-5">
-            <div class="col-md-4" v-for="card in cards" :key="card.title">
-                <div class="card shadow-sm h-100">
-                    <div :class="['card-header text-white', card.bgGradient]"
-                        style="border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;">
-                        <h6 class="mb-0 fw-bold">{{ card.title }}</h6>
+    <div class="dashboard-home">
+        <div class="dashboard-header">
+            <h1 class="dashboard-title">Mi Dashboard</h1>
+            <p class="dashboard-subtitle">Gestiona tus publicaciones y estadísticas</p>
+        </div>
+
+        <div class="dashboard-stats row g-4 mb-5">
+            <div class="col-md-4" v-for="card in statCards" :key="card.title">
+                <div class="stat-card">
+                    <div :class="['stat-icon', card.bg]">
+                        <i :class="card.icon"></i>
                     </div>
-                    <div class="card-body d-flex flex-column">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <div class="icon-circle" :style="{ backgroundColor: card.iconBgColor }">
-                                <i :class="card.icon" class="fs-4"></i>
-                            </div>
-                            <div class="text-center flex-grow-1">
-                                <h3 class="fw-bold mb-0">{{ card.value }}</h3>
-                                <small class="text-muted">{{ card.subtitle }}</small>
-                            </div>
-                            <div class="icon-circle" :style="{ backgroundColor: card.percentBgColor }">
-                                <small class="fw-bold" :class="card.percentTextColor">{{ card.percentage }}</small>
-                            </div>
-                        </div>
-                        <a href="#" :class="['fw-bold text-decoration-none', card.linkColor]">
-                            {{ card.linkText }} <i class="bi bi-arrow-right ms-1"></i>
-                        </a>
+                    <div class="stat-info">
+                        <div class="stat-value">{{ card.value }}</div>
+                        <div class="stat-label">{{ card.label }}</div>
+                        <div class="stat-desc">{{ card.desc }}</div>
                     </div>
                 </div>
             </div>
         </div>
-        <h5 class="fw-bold mb-4" style="text-align: left">Mis favoritos</h5>
-        <div class="row g-4">
-            <div class="col-md-6">
-                <div class="card shadow-sm h-100">
-                    <div class="card-body p-3 d-flex flex-column">
-                        <div class="d-flex justify-content-between">
-                            <span class="badge bg-danger">Premium</span>
-                            <i class="bi bi-heart-fill text-danger"></i>
-                        </div>
-                        <div class="flex-grow-1 d-flex align-items-center justify-content-center">
-                            <div class="placeholder-image"></div>
-                        </div>
-                        <div class="mt-3">
-                            <h6 class="fw-bold mb-1">BMW Concept 101</h6>
-                            <small class="text-muted">2022 • Usado • 1,000 Mi</small>
-                            <div class="d-flex align-items-center mt-2">
-                                <i class="bi bi-star-fill text-warning me-1"></i>
-                                <small class="text-muted">4.0 (12 reseñas)</small>
-                            </div>
-                            <p class="fw-bold fs-5 mt-2">US $180,001.00</p>
-                            <div class="d-flex gap-2">
-                                <button class="btn btn-outline-dark btn-sm w-50">Contactar vendedor</button>
-                                <button class="btn btn-danger btn-sm w-50">Ver detalles</button>
-                            </div>
-                        </div>
-                    </div>
+
+        <div class="recent-posts-header d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <h2 class="recent-title">Publicaciones Recientes</h2>
+                <p class="recent-subtitle">Tus últimas motos publicadas</p>
+            </div>
+            <button class="btn btn-light btn-sm" @click="goToAllPosts">
+                Ver todas <i class="bi bi-arrow-right ms-1"></i>
+            </button>
+        </div>
+
+        <div class="recent-posts-list mb-5">
+            <div class="row g-4">
+                <div v-for="publicacion in lastPosts" :key="publicacion.publicacion_id" class="col-md-4 d-flex">
+                    <PublicacionCard :publicacion="mapPublicacion(publicacion)" />
+                </div>
+                <div v-if="lastPosts.length === 0" class="col-12 text-center text-muted py-5">
+                    No tienes publicaciones recientes.
                 </div>
             </div>
-            <div class="col-md-6">
-                <div class="card shadow-sm h-100 d-flex align-items-center justify-content-center text-center p-4">
-                    <div>
-                        <i class="bi bi-heart fs-1 text-danger mb-3"></i>
-                        <h6 class="fw-bold mb-2">Encuentra más motos</h6>
-                        <p class="text-muted">Explora nuestro catálogo para descubrir más motos que te encantarán</p>
-                        <button class="btn btn-danger btn-sm mt-2">
-                            Explorar catálogo <i class="bi bi-arrow-right ms-1"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
+        </div>
+
+        <div class="more-bikes-cta my-5 p-4 text-center">
+            <h5 class="fw-bold mb-2">¿Tienes más motos para vender?</h5>
+            <p class="text-muted mb-3">Publica tus motos y llega a miles de compradores potenciales</p>
+            <button class="btn btn-dark" @click="goToCreatePost">
+                Publicar Nueva Moto
+            </button>
         </div>
     </div>
 </template>
 
 <script setup>
-const cards = [
+import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import api from '@/services/api';
+import { useToast } from 'vue-toastification';
+import PublicacionCard from '@/components/ui/posts/PublicacionCard.vue';
+import { useAuthStore } from '@/stores/authStore';
+
+const router = useRouter();
+const auth = useAuthStore();
+const toast = useToast();
+
+const totalBikes = ref(0);
+const totalPosts = ref(0);
+const totalViews = ref(0);
+const lastPosts = ref([]);
+
+const statCards = [
     {
-        title: 'Motos Publicadas',
-        value: '3 / 5',
-        subtitle: 'Publicaciones activas',
-        percentage: '60%',
+        title: 'Total de Motos',
+        value: totalBikes,
+        label: 'Motos en tu garaje',
+        desc: '',
         icon: 'bi bi-bicycle',
-        iconBgColor: '#fee2e2',
-        percentBgColor: '#fee2e2',
-        percentTextColor: 'text-danger',
-        linkText: 'Ver publicaciones',
-        linkColor: 'text-danger',
-        bgGradient: 'bg-gradient-red',
+        bg: 'stat-bg-red',
     },
     {
-        title: 'Accesorios / Piezas',
-        value: '2',
-        subtitle: 'Accesorios publicados',
-        percentage: '2',
-        icon: 'bi bi-droplet-half',
-        iconBgColor: '#dbeafe',
-        percentBgColor: '#dbeafe',
-        percentTextColor: 'text-primary',
-        linkText: 'Ver accesorios',
-        linkColor: 'text-primary',
-        bgGradient: 'bg-gradient-blue',
+        title: 'Publicaciones',
+        value: totalPosts,
+        label: 'Anuncios activos',
+        desc: '',
+        icon: 'bi bi-file-earmark-text',
+        bg: 'stat-bg-blue',
     },
     {
-        title: 'Vistas Totales',
-        value: '377',
-        subtitle: 'Vistas este mes',
-        percentage: '+12%',
+        title: 'Vistas (30 días)',
+        value: totalViews,
+        label: 'Visualizaciones totales',
+        desc: '',
         icon: 'bi bi-eye',
-        iconBgColor: '#dcfce7',
-        percentBgColor: '#dcfce7',
-        percentTextColor: 'text-success',
-        linkText: 'Ver estadísticas',
-        linkColor: 'text-success',
-        bgGradient: 'bg-gradient-green',
+        bg: 'stat-bg-green',
     },
 ];
+
+const fetchDashboard = async () => {
+    try {
+        const userId = auth.userId || auth.user?.user_id;
+        const { data } = await api.get(`/api/users/dashboard/${userId}`);
+        totalBikes.value = data.total_bikes;
+        totalPosts.value = data.total_posts;
+        totalViews.value = data.total_views_30d;
+        lastPosts.value = data.last_posts || [];
+    } catch (e) {
+        toast.error('Error al cargar el dashboard. Inténtalo de nuevo más tarde.');
+        totalBikes.value = 0;
+        totalPosts.value = 0;
+        totalViews.value = 0;
+        lastPosts.value = [];
+    }
+};
+
+onMounted(fetchDashboard);
+
+function goToAllPosts() {
+    router.push('/perfil?tab=publicaciones');
+}
+function goToCreatePost() {
+    router.push('/motos/publicacion/crear');
+}
+
+function mapPublicacion(post) {
+    return {
+        ...post,
+        bike: {
+            ...post.bike,
+            displacement: post.bike?.displacement || '',
+            power: post.bike?.power || '',
+        },
+        marca_denorm: post.bike?.marca,
+        modelo_denorm: post.bike?.modelo,
+        tipo_moneda: { nombre_tipo_moneda: 'US$' },
+        condicion_motor: { nombre_condicion: post.condicion_motor || 'N/A' },
+        user: auth.user
+    };
+}
 </script>
 
 <style scoped>
-.placeholder-image {
-    width: 100%;
-    height: 150px;
-    background-color: #f8f9fa;
-    border-radius: 0.5rem;
-    background-image: url('/placeholder.svg');
-    background-size: cover;
-    background-position: center;
+.dashboard-home {
+    padding: 15px;
+    max-width: 100%;
+    /* margin: 0 auto; */
 }
 
-.icon-circle {
-    width: 45px;
-    height: 45px;
-    border-radius: 9999px;
+.dashboard-header {
+    margin-bottom: 32px;
+}
+
+.dashboard-title {
+    font-size: 2.2rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+}
+
+.dashboard-subtitle {
+    color: #6c757d;
+    font-size: 1.1rem;
+}
+
+.dashboard-stats {
+    margin-bottom: 40px;
+}
+
+.stat-card {
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
     display: flex;
-    justify-content: center;
     align-items: center;
+    gap: 1.5rem;
+    padding: 1.5rem 1.25rem;
+    min-height: 120px;
 }
 
-/* Custom Gradients */
-.bg-gradient-red {
+.stat-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: #fff;
+}
+
+.stat-bg-red {
     background: linear-gradient(90deg, #ef4444 0%, #dc2626 100%);
 }
 
-.bg-gradient-blue {
+.stat-bg-blue {
     background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
 }
 
-.bg-gradient-green {
+.stat-bg-green {
     background: linear-gradient(90deg, #22c55e 0%, #16a34a 100%);
 }
 
-.card-header {
-    padding: 1rem;
+.stat-info {
+    flex: 1;
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+}
+
+.stat-label {
+    font-size: 1rem;
+    color: #6c757d;
+}
+
+.stat-desc {
+    font-size: 0.95rem;
+    color: #adb5bd;
+}
+
+.recent-posts-header {
+    margin-bottom: 1.5rem;
+}
+
+.recent-title {
+    font-size: 1.35rem;
+    font-weight: 700;
+    margin-bottom: 0.15rem;
+}
+
+.recent-subtitle {
+    color: #6c757d;
+    font-size: 1rem;
+}
+
+.recent-posts-list {
+    margin-bottom: 2.5rem;
+}
+
+.more-bikes-cta {
+    background: #f8f9fa;
+    border-radius: 1rem;
+    border: 1.5px dashed #e0e0e0;
 }
 </style>

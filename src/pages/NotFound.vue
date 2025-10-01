@@ -218,7 +218,7 @@ const goBack = () => {
 
 .btn-primary:hover {
     background: #c82333;
-    border-color: #c82333;
+    border-color: #c82333 !important;
     transform: translateY(-2px);
     box-shadow: 0 8px 25px rgba(220, 53, 69, 0.3);
     color: white;
@@ -233,6 +233,7 @@ const goBack = () => {
 
 .btn-outline-primary:hover {
     background: #dc3545;
+    border-color: #dc3545 !important;
     color: white;
     transform: translateY(-2px);
     box-shadow: 0 8px 25px rgba(220, 53, 69, 0.3);

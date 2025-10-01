@@ -24,6 +24,13 @@
                 </div>
             </div>
             <div class="nav-links" style="margin-right: 7.5%">
+                <div v-for="(item, index) in adminLinks" :key="`admin-${index}`" class="nav-item" v-if="adminLinks.length">
+                    <router-link :to="item.path" class="nav-link" :class="{ 'highlighted': isActiveRoute(item.path) }">
+                        <i :class="{ 'highlighted': isActiveRoute(item.path) }"></i>
+                        {{ item.label }}
+                        <span class="underline-animation"></span>
+                    </router-link>
+                </div>
                 <div v-for="(item, index) in authLinks" :key="`auth-${index}`" class="nav-item">
                     <router-link :to="item.path" class="nav-link" :class="{ 'highlighted': isActiveRoute(item.path) }">
                         <i :class="{ 'highlighted': isActiveRoute(item.path) }"></i>
@@ -55,6 +62,14 @@ const moduleLinks = ref([
 const isActiveRoute = (path) => {
     return path === '/' ? route.path === '/' : route.path.startsWith(path);
 };
+
+const adminLinks = computed(() => {
+    return auth.hasRole('Administrador')
+        ? [
+            { path: '/admin/dashboard', label: 'ADMINISTRACIÓN' },
+        ]
+        : [];
+});
 
 const authLinks = computed(() => {
     return auth.isLoggedIn
