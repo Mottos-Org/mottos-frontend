@@ -16,7 +16,10 @@
                 <!-- Tab Content -->
                 <div class="tab-content bg-white rounded shadow-sm">
                     <Transition name="fade" mode="out-in">
-                        <component :is="getCurrentTabComponent()" />
+                        <component
+                            :is="getCurrentTabComponent()"
+                            :switchTab="switchTab"
+                        />
                     </Transition>
                 </div>
             </div>
@@ -25,7 +28,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref } from 'vue';
 import SidebarMenu from '@/components/ui/SidebarMenu.vue';
 import DashboardHome from '@/pages/userPages/profileTabs/DashboardHome.vue';
 import MyProfile from '@/pages/userPages/profileTabs/MyProfile.vue';
@@ -37,12 +40,7 @@ import AccountVerification from './profileTabs/AccountVerification.vue';
 import MyGarage from './profileTabs/MyGarage.vue';
 
 const activeTab = ref('dashboard');
-
-const switchTab = (tabId) => {
-    activeTab.value = tabId;
-};
-
-// TODO: Obtener tabs desde query params
+const switchTab = (tabId) => { activeTab.value = tabId; };
 
 const tabs = [
     { id: 'dashboard', component: DashboardHome },

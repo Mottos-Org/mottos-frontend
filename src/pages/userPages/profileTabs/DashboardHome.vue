@@ -25,7 +25,7 @@
                 <h2 class="recent-title">Publicaciones Recientes</h2>
                 <p class="recent-subtitle">Tus últimas motos publicadas</p>
             </div>
-            <button class="btn btn-light btn-sm" @click="goToAllPosts">
+            <button class="btn btn-light btn-sm" @click="switchTab && switchTab('publications')">
                 Ver todas <i class="bi bi-arrow-right ms-1"></i>
             </button>
         </div>
@@ -52,6 +52,10 @@
 </template>
 
 <script setup>
+defineProps({
+    switchTab: Function
+});
+
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import api from '@/services/api';
