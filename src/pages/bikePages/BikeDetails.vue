@@ -9,13 +9,17 @@
 
     <div v-else-if="bike" class="bike-details-content">
       <div class="bike-details-hero">
-        <div class="hero-image-wrapper" @click="openImageViewer">
-          <img
-            :src="currentImage?.url || '/placeholder-bike.jpg'"
-            :alt="`${bike.marca?.nombre_marca} ${bike.modelo?.nombre_modelo}`"
-            class="hero-image"
-            @error="handleImageError"
-          />
+        <div class="hero-image-wrapper" @click="openImageModal">
+          <transition name="fade" mode="out-in">
+            <img
+              v-if="currentImage"
+              :key="currentImage?.url"
+              :src="currentImage?.url || '/placeholder-bike.jpg'"
+              :alt="`${bike.marca?.nombre_marca} ${bike.modelo?.nombre_modelo}`"
+              class="hero-image"
+              @error="handleImageError"
+            />
+          </transition>
           <div class="image-overlay-indicator">
             <i class="bi bi-zoom-in"></i>
             <span>Click para ampliar</span>
@@ -167,30 +171,59 @@
       </div>
     </div>
 
-    <div v-if="showImageViewer" class="image-viewer-overlay" @click="closeImageViewer">
-      <div class="image-viewer-container">
-        <button @click="closeImageViewer" class="close-viewer">
-          <i class="bi bi-x-lg"></i>
-        </button>
-        
-        <img 
-          :src="currentImage?.url" 
-          :alt="`${bike?.marca?.nombre_marca} ${bike?.modelo?.nombre_modelo}`"
-          class="viewer-image"
-          @click.stop
-        />
-        
-        <div v-if="bike.images?.length > 1" class="viewer-navigation">
-          <button @click.stop="previousImage" :disabled="currentImageIndex === 0">
-            <i class="bi bi-chevron-left"></i>
-          </button>
-          <span>{{ currentImageIndex + 1 }} / {{ bike.images.length }}</span>
-          <button @click.stop="nextImage" :disabled="currentImageIndex === bike.images.length - 1">
-            <i class="bi bi-chevron-right"></i>
-          </button>
+    <!-- MODAL GALLERY -->
+    <teleport to="body">
+      <transition name="modal-fade">
+        <div v-if="showImageModal && bike?.images?.length" class="image-modal-overlay" @click="closeImageModal">
+          <div class="image-modal-container" @click.stop>
+            <button class="modal-close-btn" @click="closeImageModal">
+              <i class="bi bi-x-lg"></i>
+            </button>
+            <button 
+              v-if="bike.images.length > 1" 
+              class="modal-nav-btn prev-btn" 
+              @click="previousModalImage"
+              :disabled="modalImageIndex === 0"
+            >
+              <i class="bi bi-chevron-left"></i>
+            </button>
+            <button 
+              v-if="bike.images.length > 1" 
+              class="modal-nav-btn next-btn" 
+              @click="nextModalImage"
+              :disabled="modalImageIndex === bike.images.length - 1"
+            >
+              <i class="bi bi-chevron-right"></i>
+            </button>
+            <div class="modal-image-wrapper">
+              <transition name="image-slide" mode="out-in">
+                <img 
+                  v-if="bike.images[modalImageIndex]"
+                  :key="bike.images[modalImageIndex]?.url"
+                  :src="bike.images[modalImageIndex]?.url"
+                  :alt="`${bike.marca?.nombre_marca} ${bike.modelo?.nombre_modelo} - Imagen ${modalImageIndex + 1}`"
+                  class="modal-image"
+                />
+              </transition>
+              <div v-if="bike.images.length > 1" class="image-counter">
+                {{ modalImageIndex + 1 }} / {{ bike.images.length }}
+              </div>
+            </div>
+            <div v-if="bike.images.length > 1" class="modal-thumbnails">
+              <div 
+                v-for="(img, idx) in bike.images" 
+                :key="img.image_id"
+                class="modal-thumbnail"
+                :class="{ active: modalImageIndex === idx }"
+                @click="modalImageIndex = idx"
+              >
+                <img :src="img.url" :alt="`Thumbnail ${idx + 1}`" />
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
+      </transition>
+    </teleport>
 
     <ImageUploadModal
       v-if="showImageUploadModal"
@@ -246,7 +279,8 @@ const currentImageIndex = ref(0);
 const showImageUploadModal = ref(false);
 const showEditBikeModal = ref(false);
 const showDeleteBikeModal = ref(false);
-const showImageViewer = ref(false);
+const showImageModal = ref(false);
+const modalImageIndex = ref(0);
 const deletingBike = ref(false);
 
 const isOwner = computed(() => {
@@ -473,9 +507,43 @@ const handleKeydown = (event) => {
     }
 };
 
+function openImageModal() {
+  if (bike.value?.images?.length) {
+    modalImageIndex.value = currentImageIndex.value;
+    showImageModal.value = true;
+    document.body.style.overflow = 'hidden';
+  }
+}
+function closeImageModal() {
+  showImageModal.value = false;
+  document.body.style.overflow = '';
+  // Sync main gallery index with modal
+  currentImageIndex.value = modalImageIndex.value;
+}
+function nextModalImage() {
+  if (modalImageIndex.value < bike.value.images.length - 1) {
+    modalImageIndex.value++;
+  }
+}
+function previousModalImage() {
+  if (modalImageIndex.value > 0) {
+    modalImageIndex.value--;
+  }
+}
+
+// Keyboard navigation for modal
+function handleModalKeydown(event) {
+  if (!showImageModal.value) return;
+  switch (event.key) {
+    case 'Escape': closeImageModal(); break;
+    case 'ArrowLeft': previousModalImage(); break;
+    case 'ArrowRight': nextModalImage(); break;
+  }
+}
 onMounted(() => {
-    fetchBikeDetails();
-    window.addEventListener('keydown', handleKeydown);
+  fetchBikeDetails();
+  window.addEventListener('keydown', handleKeydown);
+  window.addEventListener('keydown', handleModalKeydown);
 });
 
 watch(() => route.params.id, (newId) => {
@@ -486,6 +554,7 @@ watch(() => route.params.id, (newId) => {
 
 onUnmounted(() => {
     window.removeEventListener('keydown', handleKeydown);
+    window.removeEventListener('keydown', handleModalKeydown);
     document.body.style.overflow = '';
 });
 </script>
@@ -881,6 +950,105 @@ onUnmounted(() => {
 .viewer-navigation button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+.modal-fade-enter-active, .modal-fade-leave-active {
+    transition: opacity 0.3s ease;
+}
+.modal-fade-enter-from, .modal-fade-leave-to {
+    opacity: 0;
+}
+.image-slide-enter-active, .image-slide-leave-active {
+    transition: all 0.3s ease;
+}
+.image-slide-enter-from {
+    opacity: 0;
+    transform: translateX(30px);
+}
+.image-slide-leave-to {
+    opacity: 0;
+    transform: translateX(-30px);
+}
+.image-modal-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(0,0,0,0.9);
+    display: flex; justify-content: center; align-items: center;
+    z-index: 9999; cursor: pointer;
+}
+.image-modal-container {
+    position: relative;
+    width: 95%; height: 95%;
+    max-width: 1200px; max-height: 900px;
+    display: flex; flex-direction: column;
+    cursor: default;
+}
+.modal-close-btn {
+    position: absolute; top: 20px; right: 20px;
+    width: 45px; height: 45px;
+    background: rgba(255,255,255,0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 50%; color: white; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; transition: all 0.3s ease; z-index: 10;
+}
+.modal-close-btn:hover {
+    background: rgba(255,255,255,0.2);
+    transform: scale(1.1);
+}
+.modal-nav-btn {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    width: 50px; height: 50px;
+    background: rgba(255,255,255,0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 50%; color: white; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; transition: all 0.3s ease; z-index: 10;
+}
+.modal-nav-btn:hover:not(:disabled) {
+    background: rgba(255,255,255,0.2);
+    transform: translateY(-50%) scale(1.1);
+}
+.modal-nav-btn:disabled {
+    opacity: 0.3; cursor: not-allowed;
+}
+.prev-btn { left: 20px; }
+.next-btn { right: 20px; }
+.modal-image-wrapper {
+    flex: 1; display: flex; align-items: center; justify-content: center;
+    position: relative; overflow: hidden; border-radius: 12px;
+    margin: 80px 20px 20px 20px;
+}
+.modal-image {
+    max-width: 100%; max-height: 100%;
+    object-fit: contain; border-radius: 8px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+}
+.image-counter {
+    position: absolute; top: 20px; left: 20px;
+    background: rgba(0,0,0,0.6); color: white;
+    padding: 8px 16px; border-radius: 20px;
+    font-size: 14px; font-weight: 500;
+}
+.modal-thumbnails {
+    display: flex; justify-content: center; gap: 8px; padding: 20px; overflow-x: auto;
+}
+.modal-thumbnail {
+    width: 60px; height: 45px; border-radius: 6px; overflow: hidden;
+    cursor: pointer; border: 2px solid transparent;
+    transition: all 0.2s ease; flex-shrink: 0;
+}
+.modal-thumbnail.active {
+    border-color: #dc3545;
+}
+.modal-thumbnail:hover {
+    border-color: rgba(220, 53, 69, 0.6);
+    transform: scale(1.05);
+}
+.modal-thumbnail img {
+    width: 100%; height: 100%; object-fit: cover;
 }
 
 @media (max-width: 900px) {
