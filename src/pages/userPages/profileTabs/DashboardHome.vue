@@ -151,6 +151,7 @@ function mapPublicacion(post) {
 
 .dashboard-header {
     margin-bottom: 32px;
+    text-align: left;
 }
 
 .dashboard-title {

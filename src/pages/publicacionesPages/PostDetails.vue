@@ -18,6 +18,11 @@
                         @image-selected="currentImageIndex = $event"
                     />
 
+                    <div v-if="!post.approved" class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        Esta publicación está pendiente de aprobación por un administrador.
+                    </div>
+
                     <PostHeader
                         :title="postTitle"
                         :year="post.bike?.year"
@@ -95,6 +100,7 @@
                         :seller="post.user"
                         :location="locationText"
                         :published-date="formatDate(post.created_at)"
+                        :post-data="post"
                     />
 
                     <LocationMap 

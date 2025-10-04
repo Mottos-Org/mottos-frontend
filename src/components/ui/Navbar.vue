@@ -66,7 +66,7 @@ const isActiveRoute = (path) => {
 const adminLinks = computed(() => {
     return auth.hasRole('Administrador')
         ? [
-            { path: '/admin/dashboard', label: 'ADMINISTRACIÓN' },
+            { path: '/auth/admin/menu', label: 'ADMINISTRACIÓN' },
         ]
         : [];
 });

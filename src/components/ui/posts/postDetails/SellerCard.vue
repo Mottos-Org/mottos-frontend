@@ -10,24 +10,21 @@
         <template v-else>
             <div class="seller-header">
                 <div class="seller-avatar">
-                    <img 
-                        v-if="profileImageSrc" 
-                        :src="profileImageSrc" 
-                        :alt="`${seller.nombres} ${seller.apellidos}`"
-                        @error="handleImageError"
-                        class="avatar-image"
-                    />
+                    <img v-if="profileImageSrc" :src="profileImageSrc" :alt="`${seller.nombres} ${seller.apellidos}`"
+                        @error="handleImageError" class="avatar-image" />
                     <span v-else class="avatar-initials">{{ initials }}</span>
                 </div>
                 <div class="seller-info">
                     <h4 class="seller-name">{{ seller.nombres }} {{ seller.apellidos }}</h4>
-                    <div v-if="sellerVerificationStatus?.verification_status?.fully_verified" class="seller-verification">
+                    <div v-if="sellerVerificationStatus?.verification_status?.fully_verified"
+                        class="seller-verification">
                         <i class="bi bi-check-circle"></i>
                         <span>Usuario verificado</span>
                     </div>
                     <div v-else class="seller-verification unverified">
                         <i class="bi bi-exclamation-triangle"></i>
-                        <span>Usuario no verificado</span>
+                        <span v-if="!isOwner">Usuario no verificado</span>
+                        <span v-else>Tu cuenta no está verificada, <router-link to="/auth/mi-cuenta">cambia tus preferencias</router-link> si quieres cambiar esto.</span>
                     </div>
                 </div>
             </div>
@@ -52,7 +49,13 @@
 
                 <div v-if="!shouldShowPhone && !shouldShowEmail" class="privacy-notice">
                     <i class="bi bi-shield-check"></i>
-                    <span>El vendedor ha restringido la visualización de su información de contacto</span>
+                    <span v-if="isOwner" style="text-align: left;">
+                        Haz restringido la visualización de tu información de contacto.
+                        <router-link to="/auth/mi-cuenta">Cambia tus preferencias</router-link> si quieres cambiar esto.
+                    </span>
+                    <span v-else style="text-align: left;">
+                        El vendedor ha restringido la visualización de su información de contacto
+                    </span>
                 </div>
             </div>
 
@@ -70,13 +73,16 @@
 import { computed, ref, onMounted } from 'vue';
 import { formatPhoneNumber } from '../../../../utils/formatUtils';
 import authUtils from '../../../../utils/authUtils';
+import { useAuthStore } from '../../../../stores/authStore';
 
 const props = defineProps({
     seller: Object,
     location: String,
-    publishedDate: String
+    publishedDate: String,
+    postData: Object
 });
 
+const authStore = useAuthStore();
 const sellerUser = ref(null);
 const sellerVerificationStatus = ref(null);
 const profileImageSrc = ref(null);
@@ -87,6 +93,13 @@ const initials = computed(() => {
     const first = props.seller?.nombres?.charAt(0).toUpperCase() || '';
     const last = props.seller?.apellidos?.charAt(0).toUpperCase() || '';
     return first + last;
+});
+
+const isOwner = computed(() => {
+    const currentUserId = String(authStore.userId);
+    const postOwnerId = String(props.seller.user_id);
+    const userIsOwner = currentUserId === postOwnerId;
+    return userIsOwner;
 });
 
 const shouldShowPhone = computed(() => {
@@ -121,7 +134,7 @@ onMounted(async () => {
         sellerVerificationStatus.value = await authUtils.fetchUserVerificationStatus(props.seller.user_id);
 
         setProfileImage();
-        
+
     } catch (error) {
         console.error('Error fetching seller information:', error);
     } finally {
@@ -313,7 +326,7 @@ onMounted(async () => {
     .contact-buttons {
         flex-direction: column;
     }
-    
+
     .seller-detail {
         font-size: 13px;
     }
