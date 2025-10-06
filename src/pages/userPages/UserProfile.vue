@@ -38,6 +38,7 @@ import MyFavorites from '@/pages/userPages/profileTabs/MyFavorites.vue';
 import MyPreferences from './profileTabs/MyPreferences.vue';
 import AccountVerification from './profileTabs/AccountVerification.vue';
 import MyGarage from './profileTabs/MyGarage.vue';
+import PostMessages from './profileTabs/PostMessages.vue';
 
 const activeTab = ref('dashboard');
 const switchTab = (tabId) => { activeTab.value = tabId; };
@@ -51,6 +52,7 @@ const tabs = [
     { id: 'favorites', component: MyFavorites },
     { id: 'settings', component: MyPreferences },
     { id: 'verification', component: AccountVerification },
+    { id: 'post-messages', component: PostMessages },
 ];
 
 const getCurrentTabComponent = () =>

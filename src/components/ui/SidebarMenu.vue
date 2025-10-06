@@ -91,6 +91,7 @@ const sidebarTabs = [
     { id: 'publications', label: 'Mis Publicaciones', icon: 'fa fa-motorcycle' },
     { id: 'favorites', label: 'Favoritos', icon: 'bi bi-heart' },
     { id: 'messages', label: 'Mensajes', icon: 'bi bi-envelope' },
+    { id: 'post-messages', label: 'Mensajes de Publicaciones', icon: 'bi bi-chat-dots' },
 ];
 
 function confirmLogout() {

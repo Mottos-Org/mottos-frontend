@@ -209,7 +209,7 @@ const loadPostData = async () => {
         
         const postResponse = await api.get(`/api/publicaciones/details/${props.postId}`);
         const post = postResponse.data.post;
-        
+
         if (post.user.user_id !== auth.userId && !auth.hasRole('Administrador')) {
             toast.error('No tienes permisos para editar esta publicación');
             router.push('/motos/publicaciones');
