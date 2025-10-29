@@ -8,7 +8,7 @@
                 </div>
                 <div v-else class="text-center mb-4">
                     <img v-if="auth.user?.profile?.foto_perfil" :src="auth.user?.profile?.foto_perfil_url"
-                        alt="Foto de perfil" class="rounded-circle mb-2" style="width: 125px; height: 125px;" />
+                        alt="Foto de perfil" class="profile-img mb-2"/>
                     <img v-else class="rounded-circle mb-2" src="/default_profile_pic.png" alt="Foto de perfil"
                         style="width: 125px;" />
                     <h5 class="fw-bold mb-0">{{ auth.user?.user?.nombres }}</h5>
@@ -115,6 +115,14 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+.profile-img {
+    width: 125px;
+    height: 125px;
+    object-fit: cover;
+    border-radius: 50%;
+    display: inline-block;
+}
+
 .loader-container {
     height: 100%;
     min-height: 250px;
