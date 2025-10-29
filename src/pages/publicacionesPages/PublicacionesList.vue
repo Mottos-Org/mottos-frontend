@@ -131,7 +131,7 @@ const buildQueryParams = () => {
     });
     
     // Always add these required parameters for the public view
-    params.append('approved_only', '0');
+    params.append('approved_only', '1');
     params.append('is_active', '0');
     
     return params;
