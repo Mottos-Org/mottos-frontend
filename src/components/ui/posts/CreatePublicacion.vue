@@ -210,9 +210,18 @@ const loadPostData = async () => {
         const postResponse = await api.get(`/api/publicaciones/details/${props.postId}`);
         const post = postResponse.data.post;
 
-        if (post.user.user_id !== auth.userId && !auth.hasRole('Administrador')) {
+        const ownerId = post?.user?.user_id ?? post?.user_id ?? null;
+        const currentUserId = auth.userId ?? String(auth.user?.user_id ?? null);
+
+        if (!ownerId) {
+            toast.error('Publicación inválida');
+            router.replace('/motos/publicaciones');
+            return;
+        }
+
+        if (String(ownerId) !== String(currentUserId) && !auth.hasRole('Administrador')) {
             toast.error('No tienes permisos para editar esta publicación');
-            router.push('/motos/publicaciones');
+            router.replace('/motos/publicaciones');
             return;
         }
         
