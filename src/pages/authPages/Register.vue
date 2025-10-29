@@ -40,6 +40,7 @@ onMounted(async () => {
     height: 100vh;
     flex-wrap: wrap;
     padding: 20px;
+    margin-bottom: 150px;
 }
 
 .register-col {

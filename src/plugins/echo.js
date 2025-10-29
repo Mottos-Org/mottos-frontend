@@ -1,35 +1,27 @@
 import Echo from 'laravel-echo';
 import Pusher from 'pusher-js';
 
-let echoInstance = null;
-
-const API_BASE_URL = import.meta.env.VITE_API_URL;
-
 export function initializeEcho(token) {
-    if (!token) {
-        console.warn("No token, Echo will not initialize.");
-        return null;
-    }
+  if (!token) return null;
 
-    window.Pusher = Pusher;
+  window.Pusher = Pusher;
 
-    echoInstance = new Echo({
-        broadcaster: 'reverb',
-        key: import.meta.env.VITE_REVERB_APP_KEY,
-        wsHost: import.meta.env.VITE_REVERB_HOST,
-        wsPort: import.meta.env.VITE_REVERB_PORT ?? 80,
-        wssPort: import.meta.env.VITE_REVERB_PORT ?? 443,
-        forceTLS: (import.meta.env.VITE_REVERB_SCHEME ?? 'https') === 'https',
-        enabledTransports: ['ws', 'wss'],
-        authEndpoint: `${API_BASE_URL}/api/broadcasting/auth`,
-        auth: {
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
-        },
-    });
+  const host = import.meta.env.VITE_REVERB_HOST || window.location.hostname;
+  const port = Number(import.meta.env.VITE_REVERB_PORT || 8080);
+  const isHttps = (import.meta.env.VITE_REVERB_SCHEME || 'http') === 'https';
 
-    window.Echo = echoInstance;
+  const echo = new Echo({
+    broadcaster: 'reverb',
+    key: import.meta.env.VITE_REVERB_APP_KEY,
+    wsHost: host,
+    wsPort: port,
+    wssPort: port,
+    forceTLS: isHttps,                 // <- false for local WS
+    enabledTransports: isHttps ? ['wss'] : ['ws'],
+    authEndpoint: `${import.meta.env.VITE_API_URL}/api/broadcasting/auth`,
+    auth: { headers: { Authorization: `Bearer ${token}` } },
+  });
 
-    return echoInstance;
+  window.Echo = echo;
+  return echo;
 }
