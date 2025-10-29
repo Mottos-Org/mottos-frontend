@@ -131,7 +131,12 @@ onMounted(async () => {
     align-items: center;
 }
 
+.nav-item {
+    text-align: left;
+}
+
 .nav-link {
+    text-align: left;
     color: #333;
     padding: 0.5rem 1rem;
     border-radius: 8px;
