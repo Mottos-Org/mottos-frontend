@@ -1,113 +1,89 @@
 <template>
-    <div class="location-selector">
-        <div class="address-section">
-            <div v-if="userAddresses.length > 0" class="saved-addresses">
-                <h6 class="addresses-title">
-                    <i class="bi bi-bookmark-fill"></i>
-                    Tus direcciones guardadas
-                </h6>
-                <div class="addresses-grid">
-                    <div
-                        v-for="address in userAddresses"
-                        :key="address.direccion_id"
-                        class="address-card"
-                        :class="{ 
+  <div class="location-selector">
+    <div class="address-section">
+      <div v-if="userAddresses.length > 0" class="saved-addresses">
+        <h6 class="addresses-title">
+          <i class="bi bi-bookmark-fill"></i>
+          Tus direcciones guardadas
+        </h6>
+        <div class="addresses-grid">
+          <div
+            v-for="address in userAddresses"
+            :key="address.direccion_id"
+            class="address-card"
+            :class="{ 
                             'selected': selectedLocation === address.direccion_id,
                             'hover-effect': true 
                         }"
-                        @click="selectAddress(address.direccion_id)"
-                    >
-                        <div class="address-icon">
-                            <i class="bi bi-house-door"></i>
-                        </div>
-                        <div class="address-content">
-                            <div class="address-street">{{ address.calle }}</div>
-                            <div class="address-location">
-                                <i class="bi bi-geo-alt"></i>
-                                <span>{{ formatLocation(address) }}</span>
-                            </div>
-                        </div>
-                        <div class="selection-indicator" v-if="selectedLocation === address.direccion_id">
-                            <i class="bi bi-check-circle-fill"></i>
-                        </div>
-                    </div>
-                </div>
+            @click="selectAddress(address.direccion_id)"
+          >
+            <div class="address-icon">
+              <i class="bi bi-house-door"></i>
             </div>
-
-            <div v-if="loading" class="loading-state">
-                <div class="loading-spinner">
-                    <div class="spinner-border spinner-border-sm text-danger" role="status">
-                        <span class="visually-hidden">Cargando...</span>
-                    </div>
-                </div>
-                <span>Cargando tus direcciones...</span>
+            <div class="address-content">
+              <div class="address-street">{{ address.calle }}</div>
+              <div class="address-location">
+                <i class="bi bi-geo-alt"></i>
+                <span>{{ formatLocation(address) }}</span>
+              </div>
             </div>
-
-            <div v-if="!loading && userAddresses.length === 0" class="empty-state">
-                <div class="empty-icon">
-                    <i class="bi bi-geo-alt"></i>
-                </div>
-                <h6>No tienes direcciones guardadas</h6>
-                <p>Puedes agregar una nueva dirección para futuras publicaciones</p>
-                <button @click="showAddAddressModal = true" class="btn btn-outline-primary btn-sm">
-                    <i class="bi bi-plus-circle"></i>
-                    Agregar nueva dirección
-                </button>
+            <div class="selection-indicator" v-if="selectedLocation === address.direccion_id">
+              <i class="bi bi-check-circle-fill"></i>
             </div>
-
-            <div v-if="userAddresses.length > 0" class="add-address-section">
-                <button
-                    @click="showAddAddressModal = true"
-                    class="btn btn-outline-secondary btn-sm add-address-btn"
-                >
-                    <i class="bi bi-plus-circle"></i>
-                    Usar otra dirección
-                </button>
-            </div>
+          </div>
         </div>
+      </div>
 
-        <div v-if="error" class="error-state">
-            <div class="alert alert-danger">
-                <i class="bi bi-exclamation-triangle"></i>
-                {{ error }}
-            </div>
+      <div v-if="loading" class="loading-state">
+        <div class="loading-spinner">
+          <div class="spinner-border spinner-border-sm text-danger" role="status">
+            <span class="visually-hidden">Cargando...</span>
+          </div>
         </div>
+        <span>Cargando tus direcciones...</span>
+      </div>
 
-        <div v-if="validationError" class="invalid-feedback">
-            {{ validationError }}
+      <div v-if="!loading && userAddresses.length === 0" class="empty-state">
+        <div class="empty-icon">
+          <i class="bi bi-geo-alt"></i>
         </div>
+        <h6>No tienes direcciones guardadas</h6>
+        <p>Puedes agregar una nueva dirección para futuras publicaciones</p>
+      </div>
 
-        <div v-if="showAddAddressModal" class="modal-overlay" @click.self="showAddAddressModal = false">
-            <div class="address-modal">
-                <div class="modal-header">
-                    <h5>Agregar Nueva Dirección</h5>
-                    <button @click="showAddAddressModal = false" class="btn-close">
-                        <i class="bi bi-x"></i>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="form-group">
-                        <label class="form-label">Dirección completa</label>
-                        <textarea
-                            v-model="newAddress.calle"
-                            class="form-control"
-                            rows="3"
-                            placeholder="Ej: Residencial Lidia, B303, Los Alcarrizos..."
-                        ></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button @click="showAddAddressModal = false" class="btn btn-outline-secondary">
-                        Cancelar
-                    </button>
-                    <button @click="saveNewAddress" class="btn btn-primary" :disabled="!newAddress.calle.trim()">
-                        <i class="bi bi-save"></i>
-                        Guardar
-                    </button>
-                </div>
-            </div>
-        </div>
+      <div v-if="userAddresses.length > 0" class="add-address-section">
+        <button
+          @click="showAddAddress = !showAddAddress"
+          class="btn btn-outline-secondary btn-sm add-address-btn"
+        >
+          <i class="bi bi-plus-circle"></i>
+          Agregar otra dirección
+        </button>
+      </div>
     </div>
+
+    <div v-if="error" class="error-state">
+      <div class="alert alert-danger">
+        <i class="bi bi-exclamation-triangle"></i>
+        {{ error }}
+      </div>
+    </div>
+
+    <div v-if="validationError" class="invalid-feedback">
+      {{ validationError }}
+    </div>
+
+    <transition name="slide-fade" mode="out-in">
+      <div v-if="showAddAddress" class="address-form-card mt-3" key="add-address">
+        <AddUserAddressForm
+          :existing-addresses="userAddresses"
+          @saved="onAddressSaved"
+          @cancel="() => (showAddAddress = false)"
+          :show-close="true"
+        />
+      </div>
+    </transition>
+  </div>
 </template>
 
 <script setup>
@@ -115,16 +91,17 @@ import { ref, reactive, onMounted, computed } from 'vue';
 import { useToast } from 'vue-toastification';
 import api from '../../../services/api';
 import { useAuthStore } from '../../../stores/authStore';
+import AddUserAddressForm from '../user/AddUserAddressForm.vue';
 
 const props = defineProps({
-    selectedLocation: {
-        type: [String, Number],
-        default: null
-    },
-    error: {
-        type: String,
-        default: null
-    }
+  selectedLocation: {
+    type: [String, Number],
+    default: null
+  },
+  error: {
+    type: String,
+    default: null
+  }
 });
 
 const emit = defineEmits(['location-selected']);
@@ -135,89 +112,67 @@ const authStore = useAuthStore();
 const userAddresses = ref([]);
 const loading = ref(false);
 const error = ref(null);
-const showAddAddressModal = ref(false);
+const showAddAddress = ref(false);
 
 const newAddress = reactive({
-    calle: ''
+  calle: ''
 });
 
 const validationError = computed(() => props.error);
 
 const loadUserAddresses = async () => {
-    try {
-        loading.value = true;
-        error.value = null;
-        
-        const userId = authStore.userId;
-        if (!userId) {
-            error.value = 'Usuario no autenticado';
-            return;
-        }
-
-        const response = await api.get(`/api/users/${userId}/addresses`);
-        userAddresses.value = response.data.addresses || [];
-        
-    } catch (err) {
-        console.error('Error loading user addresses:', err);
-        error.value = 'Error al cargar las direcciones';
-        userAddresses.value = [];
-    } finally {
-        loading.value = false;
+  try {
+    loading.value = true;
+    error.value = null;
+    
+    const userId = authStore.userId;
+    if (!userId) {
+      error.value = 'Usuario no autenticado';
+      return;
     }
+
+    const response = await api.get(`/api/users/${userId}/addresses`);
+    userAddresses.value = response.data.addresses || [];
+    
+  } catch (err) {
+    console.error('Error loading user addresses:', err);
+    error.value = 'Error al cargar las direcciones';
+    userAddresses.value = [];
+  } finally {
+    loading.value = false;
+  }
 };
 
 const selectAddress = (addressId) => {
-    emit('location-selected', addressId);
+  emit('location-selected', addressId);
 };
 
-const formatLocation = (address) => {
-    const parts = [];
-    
-    if (address.sector) parts.push(address.sector);
-    if (address.municipio) parts.push(address.municipio);
-    if (address.provincia) parts.push(address.provincia);
-    if (address.pais) parts.push(address.pais.nombre_pais);
-    
-    return parts.length > 0 ? parts.join(', ') : 'República Dominicana';
+const formatLocation = (address) => {  
+  const parts = [];
+  
+  if (address.sector) parts.push(address.sector.nombre_sector);
+  if (address.municipio) parts.push(address.municipio.nombre_municipio);
+  if (address.provincia) parts.push(address.provincia.nombre_provincia);
+  if (address.pais) parts.push(address.pais.nombre_pais);
+  
+  return parts.length > 0 ? parts.join(', ') : 'República Dominicana';
 };
 
-const saveNewAddress = async () => {
-    try {
-        if (!newAddress.calle.trim()) {
-            toast.error('Debes ingresar una dirección');
-            return;
-        }
-
-        const userId = authStore.user?.user_id;
-        if (!userId) {
-            toast.error('Usuario no autenticado');
-            return;
-        }
-
-        const response = await api.post(`/api/users/${userId}/addresses`, {
-            calle: newAddress.calle.trim(),
-            pais_id: 1 // Default to Dominican Republic
-        });
-
-        await loadUserAddresses();
-        
-        if (response.data.direccion_id) {
-            emit('location-selected', response.data.direccion_id);
-        }
-        
-        newAddress.calle = '';
-        showAddAddressModal.value = false;
-        
-        toast.success('Dirección agregada exitosamente');
-        
-    } catch (err) {
-        console.error('Error saving address:', err);
-        toast.error('Error al guardar la dirección');
-    }
+const onAddressSaved = async (resData) => {
+  await loadUserAddresses();
+  
+  // try to extract created/edited direccion id if backend returned it
+  const newId = resData?.direccion_id || (resData?.addresses ? null : null);
+  
+  // simply close the form; parent can decide to select
+  showAddAddress.value = false;
+  
+  // if backend returned created id, emit it so caller can select
+  if (newId) emit('location-selected', newId);
 };
 
 onMounted(() => {
-    loadUserAddresses();
+  loadUserAddresses();
 });
 </script>
 
@@ -293,6 +248,7 @@ onMounted(() => {
 }
 
 .address-street {
+    text-align: left;
     font-weight: 600;
     color: #1a1a1a;
     margin-bottom: 0.25rem;
@@ -557,6 +513,18 @@ onMounted(() => {
     margin-top: 0.5rem;
     font-weight: 500;
 }
+
+.slide-fade-enter-active, .slide-fade-leave-active {
+  transition: all 0.32s cubic-bezier(.2,.8,.2,1);
+}
+.slide-fade-enter-from, .slide-fade-leave-to {
+  opacity: 0; transform: translateY(12px);
+}
+.slide-fade-enter-to, .slide-fade-leave-from {
+  opacity: 1; transform: translateY(0);
+}
+
+.address-form-card { margin-top: 1rem; }
 
 @media (max-width: 768px) {
     .addresses-grid {

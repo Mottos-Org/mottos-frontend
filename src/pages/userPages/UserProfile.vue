@@ -39,6 +39,7 @@ import MyPreferences from './profileTabs/MyPreferences.vue';
 import AccountVerification from './profileTabs/AccountVerification.vue';
 import MyGarage from './profileTabs/MyGarage.vue';
 import PostMessages from './profileTabs/PostMessages.vue';
+import UserAddresses from './profileTabs/UserAddresses.vue';
 
 const activeTab = ref('dashboard');
 const switchTab = (tabId) => { activeTab.value = tabId; };
@@ -47,8 +48,9 @@ const tabs = [
     { id: 'dashboard', component: DashboardHome },
     { id: 'my-garage', component: MyGarage },
     { id: 'profile', component: MyProfile },
+    { id: 'user-address', component: UserAddresses },
     { id: 'publications', component: MyPublications },
-    { id: 'messages', component: MyMessages },
+    // { id: 'messages', component: MyMessages },
     { id: 'favorites', component: MyFavorites },
     { id: 'settings', component: MyPreferences },
     { id: 'verification', component: AccountVerification },

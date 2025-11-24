@@ -53,7 +53,7 @@
                         <div class="card-body">
                             <div v-if="emailStatus === 'pending'" class="space-y-3">
                                 <div class="mb-3">
-                                    <label for="email" class="form-label">Correo electrónico</label>
+                                    <label for="email" class="form-label text-start w-100">Correo electrónico</label>
                                     <input id="email" type="email" class="form-control" placeholder="tu@email.com"
                                         :value="auth.user?.user?.email || ''" readonly />
                                 </div>

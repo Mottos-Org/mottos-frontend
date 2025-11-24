@@ -211,9 +211,9 @@
                                     />
                                     <label for="negociable" class="toggle-label">
                                         <div class="toggle-content">
-                                            <div class="toggle-icon">
+                                            <!-- <div class="toggle-icon">
                                                 <i class="bi bi-arrow-left-right"></i>
-                                            </div>
+                                            </div> -->
                                             <div class="toggle-text">
                                                 <strong>Precio negociable</strong>
                                                 <small>Los compradores podrán hacer ofertas</small>
@@ -413,6 +413,7 @@ onMounted(() => {
     border: 1px solid rgba(0, 0, 0, 0.05);
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
     transition: all 0.3s ease;
+    text-align: left;
 }
 
 .form-section:hover {
@@ -705,6 +706,7 @@ onMounted(() => {
     margin-top: 2rem;
     position: relative;
     overflow: hidden;
+    text-align: left;
 }
 
 .tips-card::before {
