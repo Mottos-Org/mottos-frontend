@@ -85,14 +85,15 @@ const loading = ref(true);
 
 const sidebarTabs = [
     { id: 'dashboard', label: 'Dashboard', icon: 'bi bi-clock-history' },
+    { id: 'favorites', label: 'Favoritos', icon: 'bi bi-heart' },
     { id: 'my-garage', label: 'Mis Motos', icon: 'fa-solid fa-warehouse' },
+    { id: 'publications', label: 'Mis Publicaciones', icon: 'fa fa-motorcycle' },
     { id: 'profile', label: 'Información de Perfil', icon: 'bi bi-person-circle' },
     { id: 'user-address', label: 'Administrar Direcciones', icon: 'bi bi-geo-alt' },
     { id: 'settings', label: 'Preferencias y Ajustes', icon: 'bi bi-gear' },
-    { id: 'publications', label: 'Mis Publicaciones', icon: 'fa fa-motorcycle' },
-    { id: 'favorites', label: 'Favoritos', icon: 'bi bi-heart' },
     // { id: 'messages', label: 'Mensajes', icon: 'bi bi-envelope' },
     { id: 'post-messages', label: 'Mensajes de Publicaciones', icon: 'bi bi-chat-dots' },
+    { id: 'market-post-chat', label: 'Mensajes de Mercado', icon: 'bi bi-chat-dots' },
 ];
 
 function confirmLogout() {

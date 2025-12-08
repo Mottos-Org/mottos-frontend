@@ -95,8 +95,8 @@
                             <div class="recipient-details">
                                 <span class="recipient-name">{{ seller.nombres }} {{ seller.apellidos }}</span>
                                 <span class="post-info">
-                                    <i class="bi bi-box-seam"></i>
-                                    {{ truncateText(postData?.descripcion, 40) }}
+                                    <i :class="isMarketplace ? 'bi bi-tag' : 'bi bi-box-seam'"></i>
+                                    {{ truncateText(postDescription, 40) }}
                                 </span>
                             </div>
                         </div>
@@ -105,7 +105,7 @@
                             <textarea
                                 v-model="messageText"
                                 class="message-textarea"
-                                placeholder="Hola, estoy interesado en tu publicación..."
+                                :placeholder="isMarketplace ? 'Hola, estoy interesado en tu producto...' : 'Hola, estoy interesado en tu publicación...'"
                                 rows="4"
                                 maxlength="500"
                                 :disabled="sendingMessage"
@@ -147,7 +147,11 @@ const props = defineProps({
     seller: Object,
     location: String,
     publishedDate: String,
-    postData: Object
+    postData: Object,
+    isMarketplace: {
+        type: Boolean,
+        default: false
+    }
 });
 
 const router = useRouter();
@@ -164,6 +168,21 @@ const hasExistingConversation = ref(false);
 const toast = useToast();
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
+
+// Computed properties for post ID based on type
+const postId = computed(() => {
+    if (props.isMarketplace) {
+        return props.postData?.publicacion_marketplace_id;
+    }
+    return props.postData?.publicacion_id;
+});
+
+const postDescription = computed(() => {
+    if (props.isMarketplace) {
+        return props.postData?.publicacion_titulo;
+    }
+    return props.postData?.descripcion;
+});
 
 const initials = computed(() => {
     const first = props.seller?.nombres?.charAt(0).toUpperCase() || '';
@@ -203,17 +222,23 @@ const setProfileImage = () => {
 };
 
 const checkExistingConversation = async () => {
-    if (!authStore.isAuthenticated || !props.postData?.publicacion_id) return;
+    if (!authStore.isAuthenticated || !postId.value) return;
 
     try {
-        const response = await api.get(`${API_BASE_URL}/api/posts/messages/chats`);
+        const endpoint = props.isMarketplace 
+            ? `${API_BASE_URL}/api/marketplace/messages/chats`
+            : `${API_BASE_URL}/api/posts/messages/chats`;
+            
+        const response = await api.get(endpoint);
         const conversations = response.data;
         
-        // Check if there's already a conversation for this post with this seller TODO
-        const exists = conversations.some(
-            chat => chat.post_id === props.postData.publicacion_id && 
-                    chat.user_id === props.seller.user_id
-        );
+        // Check if there's already a conversation for this post with this seller
+        const exists = conversations.some(chat => {
+            if (props.isMarketplace) {
+                return chat.marketplace_post_id === postId.value && chat.user_id === props.seller.user_id;
+            }
+            return chat.post_id === postId.value && chat.user_id === props.seller.user_id;
+        });
         
         hasExistingConversation.value = exists;
     } catch (error) {
@@ -247,7 +272,11 @@ const sendMessage = async () => {
     sendingMessage.value = true;
 
     try {
-        await api.post(`${API_BASE_URL}/api/posts/${props.postData.publicacion_id}/messages`, {
+        const endpoint = props.isMarketplace
+            ? `${API_BASE_URL}/api/marketplace/${postId.value}/messages`
+            : `${API_BASE_URL}/api/posts/${postId.value}/messages`;
+
+        await api.post(endpoint, {
             to_user_id: props.seller.user_id,
             message: messageText.value.trim(),
         });

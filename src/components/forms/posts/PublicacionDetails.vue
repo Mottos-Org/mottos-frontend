@@ -63,9 +63,6 @@
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <div class="input-card">
-                                    <div class="card-icon">
-                                        <i class="bi bi-heart-pulse"></i>
-                                    </div>
                                     <div class="form-group">
                                         <label class="form-label">
                                             Condición del motor
@@ -92,9 +89,6 @@
                             
                             <div class="col-md-6">
                                 <div class="input-card">
-                                    <div class="card-icon">
-                                        <i class="bi bi-speedometer2"></i>
-                                    </div>
                                     <div class="form-group">
                                         <label class="form-label">
                                             Kilometraje
@@ -139,9 +133,6 @@
                         </div>
                         
                         <div class="location-card">
-                            <div class="location-icon">
-                                <i class="bi bi-map"></i>
-                            </div>
                             <div class="form-group">
                                 <label class="form-label">
                                     ¿Dónde se encuentra tu moto?
@@ -227,9 +218,6 @@
 
                     <div class="form-section expiry-section">
                         <div class="section-title">
-                            <div class="title-icon">
-                                <i class="bi bi-calendar-check"></i>
-                            </div>
                             <div>
                                 <h4>Vigencia</h4>
                                 <span class="section-subtitle">¿Hasta cuándo estará activa?</span>
@@ -237,9 +225,6 @@
                         </div>
                         
                         <div class="date-card">
-                            <div class="calendar-icon">
-                                <i class="bi bi-calendar3"></i>
-                            </div>
                             <div class="form-group">
                                 <label class="form-label">
                                     Fecha de vencimiento
@@ -249,6 +234,7 @@
                                     v-model="localFormData.fecha_vencimiento"
                                     type="date"
                                     class="form-control enhanced-date"
+                                    disabled=true
                                     :class="{ 'is-invalid': errors.fecha_vencimiento }"
                                     :min="minDate"
                                     @change="updateForm"
@@ -608,6 +594,10 @@ onMounted(() => {
     background: linear-gradient(135deg, #dc3545, #ff6b7a);
     color: white;
     min-width: 80px;
+}
+
+.currency-select option {
+    color: black;
 }
 
 .price-input {

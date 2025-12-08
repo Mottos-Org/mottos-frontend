@@ -105,7 +105,7 @@
                 <router-link 
                     :to="`/motos/publicacion/${publicacion.publicacion_id}`"
                     class="btn btn-outline-info btn-sm"
-                    title="Ver detalles"
+                    title="Ver"
                     target="_blank"
                 >
                     <i class="bi bi-eye"></i>

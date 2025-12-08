@@ -10,6 +10,26 @@
             </div>
         </div>
 
+        <!-- Tab Switcher -->
+        <div class="tab-switcher">
+            <button 
+                :class="['tab-btn', { active: activeTab === 'bikes' }]"
+                @click="switchTab('bikes')"
+            >
+                <i class="bi bi-bicycle"></i>
+                Motos
+                <span v-if="bikesTotal > 0" class="tab-count">{{ bikesTotal }}</span>
+            </button>
+            <button 
+                :class="['tab-btn', { active: activeTab === 'marketplace' }]"
+                @click="switchTab('marketplace')"
+            >
+                <i class="bi bi-tag"></i>
+                Mercado
+                <span v-if="marketTotal > 0" class="tab-count">{{ marketTotal }}</span>
+            </button>
+        </div>
+
         <div class="filters-section">
             <div class="filter-actions">
                 <select 
@@ -25,35 +45,50 @@
         </div>
 
         <LoadingStates 
-            v-if="loading && publicaciones.length === 0"
+            v-if="loading && items.length === 0"
             type="initial"
         />
 
-        <div v-if="!loading && publicaciones.length === 0 && hasSearched" class="empty-state">
+        <div v-if="!loading && items.length === 0 && hasSearched" class="empty-state">
             <div class="empty-icon">
                 <i class="bi bi-heart"></i>
             </div>
             <h5>No tienes favoritos guardados</h5>
-            <p>Comienza explorando las publicaciones y guarda las que te interesen</p>
+            <p v-if="activeTab === 'bikes'">
+                Comienza explorando las publicaciones y guarda las que te interesen
+            </p>
+            <p v-else>
+                Explora el mercado y guarda los productos que te interesen
+            </p>
             <router-link 
-                to="/motos/publicaciones" 
+                :to="activeTab === 'bikes' ? '/motos/publicaciones' : '/mercado/publicaciones'" 
                 class="btn btn-primary"
             >
                 <i class="bi bi-search"></i>
-                Explorar Publicaciones
+                {{ activeTab === 'bikes' ? 'Explorar Publicaciones' : 'Explorar Mercado' }}
             </router-link>
         </div>
 
-        <div v-if="publicaciones.length > 0" class="publications-section">
+        <div v-if="items.length > 0" class="publications-section">
             <div class="publications-grid">
+                <!-- Bike Posts -->
                 <div 
-                    v-for="publicacion in publicaciones" 
+                    v-if="activeTab === 'bikes'"
+                    v-for="publicacion in items" 
                     :key="publicacion.publicacion_id"
                     class="publication-item"
                 >
-                    <PublicacionCard 
-                        :publicacion="publicacion"
-                    />
+                    <PublicacionCard :publicacion="publicacion" />
+                </div>
+
+                <!-- Marketplace Posts -->
+                <div 
+                    v-if="activeTab === 'marketplace'"
+                    v-for="item in items" 
+                    :key="item.publicacion_marketplace_id"
+                    class="publication-item"
+                >
+                    <MarketplaceCard :item="item" />
                 </div>
             </div>
         </div>
@@ -66,7 +101,7 @@
         />
         
         <LoadingStates 
-            v-if="publicaciones.length > 0 && !hasMorePages"
+            v-if="items.length > 0 && !hasMorePages"
             type="end"
         />
     </div>
@@ -79,20 +114,23 @@ import { useAuthStore } from '../../../stores/authStore';
 import api from '../../../services/api';
 import LoadingStates from '../../../components/ui/posts/LoadingStates.vue';
 import PublicacionCard from '../../../components/ui/posts/PublicacionCard.vue';
+import MarketplaceCard from '../../../components/ui/marketplace/MarketplaceCard.vue';
 
 const toast = useToast();
 const auth = useAuthStore();
 
-const publicaciones = ref([]);
+const activeTab = ref('bikes'); // 'bikes' or 'marketplace'
+const items = ref([]);
 const loading = ref(false);
 const loadingMore = ref(false);
 const hasSearched = ref(false);
 const paginationData = ref(null);
+const bikesTotal = ref(0);
+const marketTotal = ref(0);
 
 const sortBy = ref('created_at');
 
 const filters = reactive({
-    favorites_only: 'true',
     per_page: '12',
     page: 1,
     sort_by: 'created_at',
@@ -103,29 +141,45 @@ const hasMorePages = computed(() => {
     return paginationData.value && paginationData.value.current_page < paginationData.value.last_page;
 });
 
-const fetchPublicaciones = async (append = false) => {
+const fetchItems = async (append = false) => {
     try {
         if (!append) {
             loading.value = true;
-            publicaciones.value = [];
+            items.value = [];
         } else {
             loadingMore.value = true;
         }
 
+        let response;
         const params = buildQueryParams();
-        const response = await api.get(`/api/publicaciones?${params.toString()}`);
+        
+        if (activeTab.value === 'bikes') {
+            params.append('favorites_only', 'true');
+            response = await api.get(`/api/publicaciones?${params.toString()}`);
+        } else {
+            params.append('liked_only', 'true');
+            response = await api.get(`/api/marketplace?${params.toString()}`);
+        }
 
         if (append) {
-            publicaciones.value.push(...response.data.data);
+            items.value.push(...response.data.data);
         } else {
-            publicaciones.value = response.data.data;
+            items.value = response.data.data;
         }
         
         paginationData.value = extractPaginationData(response.data);
+        
+        // Update total counts
+        if (activeTab.value === 'bikes') {
+            bikesTotal.value = paginationData.value.total;
+        } else {
+            marketTotal.value = paginationData.value.total;
+        }
+        
         hasSearched.value = true;
     } catch (error) {
-        console.error('Error fetching favorite publications:', error);
-        toast.error('Error al cargar tus publicaciones favoritas');
+        console.error('Error fetching favorites:', error);
+        toast.error('Error al cargar tus favoritos');
     } finally {
         loading.value = false;
         loadingMore.value = false;
@@ -153,16 +207,24 @@ const extractPaginationData = (data) => ({
     to: data.to
 });
 
+const switchTab = async (tab) => {
+    if (activeTab.value !== tab) {
+        activeTab.value = tab;
+        filters.page = 1;
+        await fetchItems();
+    }
+};
+
 const applyFilters = async () => {
     filters.sort_by = sortBy.value;
     filters.page = 1;
-    await fetchPublicaciones();
+    await fetchItems();
 };
 
 const loadMore = async () => {
     if (hasMorePages.value && !loadingMore.value) {
         filters.page++;
-        await fetchPublicaciones(true);
+        await fetchItems(true);
     }
 };
 
@@ -172,7 +234,7 @@ watch(sortBy, (newSort) => {
 });
 
 onMounted(async () => {
-    await fetchPublicaciones();
+    await fetchItems();
 });
 </script>
 
@@ -185,7 +247,7 @@ onMounted(async () => {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
     padding-bottom: 1rem;
     border-bottom: 1px solid #e9ecef;
 }
@@ -206,6 +268,66 @@ onMounted(async () => {
 .header-content p {
     color: #6c757d;
     margin: 0;
+}
+
+.tab-switcher {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    padding: 0.25rem;
+    background: #f8f9fa;
+    border-radius: 10px;
+}
+
+.tab-btn {
+    flex: 1;
+    padding: 0.75rem 1.5rem;
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    color: #6c757d;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    position: relative;
+}
+
+.tab-btn i {
+    font-size: 1.1rem;
+}
+
+.tab-btn:hover {
+    background: rgba(220, 53, 69, 0.05);
+    color: #dc3545;
+}
+
+.tab-btn.active {
+    background: white;
+    color: #dc3545;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+.tab-count {
+    padding: 0.15rem 0.5rem;
+    background: #dc3545;
+    color: white;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    min-width: 24px;
+    text-align: center;
+}
+
+.tab-btn.active .tab-count {
+    background: #dc3545;
+}
+
+.tab-btn:not(.active) .tab-count {
+    background: #6c757d;
 }
 
 .filters-section {
@@ -290,6 +412,14 @@ onMounted(async () => {
         flex-direction: column;
         align-items: stretch;
         gap: 1rem;
+    }
+    
+    .tab-switcher {
+        flex-direction: column;
+    }
+    
+    .tab-btn {
+        width: 100%;
     }
     
     .filters-section {

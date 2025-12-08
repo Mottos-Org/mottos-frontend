@@ -39,6 +39,7 @@ import MyPreferences from './profileTabs/MyPreferences.vue';
 import AccountVerification from './profileTabs/AccountVerification.vue';
 import MyGarage from './profileTabs/MyGarage.vue';
 import PostMessages from './profileTabs/PostMessages.vue';
+import MarketPostMessages from './profileTabs/MarketPostMessages.vue';
 import UserAddresses from './profileTabs/UserAddresses.vue';
 
 const activeTab = ref('dashboard');
@@ -55,6 +56,7 @@ const tabs = [
     { id: 'settings', component: MyPreferences },
     { id: 'verification', component: AccountVerification },
     { id: 'post-messages', component: PostMessages },
+    { id: 'market-post-chat', component: MarketPostMessages },
 ];
 
 const getCurrentTabComponent = () =>

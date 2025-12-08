@@ -31,7 +31,7 @@
         </div>
 
         <div class="recent-posts-list mb-5">
-            <div class="row g-4">
+            <div class="row" style="gap: 50px">
                 <div v-for="publicacion in lastPosts" :key="publicacion.publicacion_id" class="col-md-4 d-flex">
                     <PublicacionCard :publicacion="mapPublicacion(publicacion)" />
                 </div>

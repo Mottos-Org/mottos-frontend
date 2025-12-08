@@ -34,7 +34,7 @@
                 <span class="ms-2">Cargando mapa...</span>
             </div>
             
-            <div 
+            <div v-if="!geocodeError"
                 ref="mapElement" 
                 class="google-map"
                 :style="{ opacity: mapReady ? 1 : 0 }"

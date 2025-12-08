@@ -36,9 +36,9 @@ const loading = ref(false);
 const fetchStatus = async () => {
     if (!auth.isLoggedIn) return;
     try {
-        const res = await api.get(`/api/publicaciones/favorites/${props.postId}`);
-        isFavorited.value = !!res.data.is_favorited;
-        favoriteCount.value = Number(res.data.favorite_count) || 0;
+        const res = await api.get(`/api/publicaciones/likes/${props.postId}`);
+        isFavorited.value = !!res.data.is_liked;
+        favoriteCount.value = Number(res.data.like_count) || 0;
     } catch (e) {
         isFavorited.value = false;
         favoriteCount.value = 0;
@@ -62,7 +62,7 @@ const toggleFavorite = async () => {
     if (loading.value) return;
     loading.value = true;
     try {
-        const res = await api.post(`/api/publicaciones/${props.postId}/toggle-favorite/`);
+        const res = await api.post(`/api/publicaciones/${props.postId}/toggle-like/`);
         isFavorited.value = !!res.data.is_favorited;
         favoriteCount.value = Number(res.data.favorite_count) || 0;
         emit('update', { isFavorited: isFavorited.value, favoriteCount: favoriteCount.value });

@@ -83,7 +83,7 @@
                 title="Ver detalles completos"
             >
                 <i class="bi bi-eye"></i>
-                Ver Detalles
+                Ver
             </button>
             
             <button 

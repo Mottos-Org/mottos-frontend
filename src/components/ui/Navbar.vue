@@ -55,6 +55,7 @@ const showMobileMenu = ref(false);
 
 const moduleLinks = ref([
     { path: '/motos/publicaciones', label: 'PUBLICACIONES' },
+    { path: '/mercado/publicaciones', label: 'MERCADO' },
     { path: '/noticias', label: 'NOTICIAS' },
     { path: '/eventos', label: 'EVENTOS' },
 ]);

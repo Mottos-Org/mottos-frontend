@@ -6,14 +6,46 @@
                     <i class="bi bi-file-post"></i>
                     Mis Publicaciones
                 </h4>
-                <p>Gestiona y revisa todas tus publicaciones de motocicletas</p>
+                <p>Gestiona y revisa todas tus publicaciones</p>
             </div>
             <div class="header-actions">
-                <router-link to="/motos/publicacion/crear" class="btn btn-primary publish-btn">
+                <router-link 
+                    v-if="activeTab === 'bikes'"
+                    to="/motos/publicacion/crear" 
+                    class="btn btn-primary publish-btn"
+                >
                     <i class="bi bi-plus-circle"></i>
                     Nueva Publicación
                 </router-link>
+                <button 
+                    v-else
+                    class="btn btn-primary publish-btn"
+                    @click="createMarketplacePost"
+                >
+                    <i class="bi bi-plus-circle"></i>
+                    Nueva Publicación
+                </button>
             </div>
+        </div>
+
+        <!-- Tab Switcher -->
+        <div class="tab-switcher">
+            <button 
+                :class="['tab-btn', { active: activeTab === 'bikes' }]"
+                @click="switchTab('bikes')"
+            >
+                <i class="bi bi-bicycle"></i>
+                Motos
+                <span v-if="bikesTotal > 0" class="tab-count">{{ bikesTotal }}</span>
+            </button>
+            <button 
+                :class="['tab-btn', { active: activeTab === 'marketplace' }]"
+                @click="switchTab('marketplace')"
+            >
+                <i class="bi bi-tag"></i>
+                Mercado
+                <span v-if="marketTotal > 0" class="tab-count">{{ marketTotal }}</span>
+            </button>
         </div>
 
         <div class="stats-row">
@@ -76,7 +108,7 @@
                     @change="applyFilters"
                 >
                     <option value="created_at">Más recientes</option>
-                    <option value="fecha_vencimiento">Por vencimiento</option>
+                    <option value="fecha_vencimiento" v-if="activeTab === 'bikes'">Por vencimiento</option>
                     <option value="precio">Por precio</option>
                     <option value="views_count">Más vistas</option>
                 </select>
@@ -84,30 +116,40 @@
         </div>
 
         <LoadingStates 
-            v-if="loading && publicaciones.length === 0"
+            v-if="loading && items.length === 0"
             type="initial"
         />
 
-        <div v-if="!loading && filteredPublicaciones.length === 0 && hasSearched" class="empty-state">
+        <div v-if="!loading && filteredItems.length === 0 && hasSearched" class="empty-state">
             <div class="empty-icon">
-                <i class="bi bi-file-post"></i>
+                <i :class="activeTab === 'bikes' ? 'bi bi-file-post' : 'bi bi-tag'"></i>
             </div>
             <h5>{{ getEmptyStateTitle() }}</h5>
             <p>{{ getEmptyStateMessage() }}</p>
             <router-link 
-                v-if="activeStatusFilter === 'all'"
+                v-if="activeStatusFilter === 'all' && activeTab === 'bikes'"
                 to="/motos/publicacion/crear" 
                 class="btn btn-primary"
             >
                 <i class="bi bi-plus-circle"></i>
                 Crear Primera Publicación
             </router-link>
+            <button 
+                v-if="activeStatusFilter === 'all' && activeTab === 'marketplace'"
+                class="btn btn-primary"
+                @click="createMarketplacePost"
+            >
+                <i class="bi bi-plus-circle"></i>
+                Crear Primera Publicación
+            </button>
         </div>
 
-        <div v-if="filteredPublicaciones.length > 0" class="publications-section">
+        <div v-if="filteredItems.length > 0" class="publications-section">
             <div class="publications-grid">
+                <!-- Bike Posts -->
                 <div 
-                    v-for="publicacion in filteredPublicaciones" 
+                    v-if="activeTab === 'bikes'"
+                    v-for="publicacion in filteredItems" 
                     :key="publicacion.publicacion_id"
                     class="publication-item"
                 >
@@ -116,6 +158,21 @@
                         @edit="handleEdit"
                         @delete="handleDelete"
                         @toggle-status="handleToggleStatus"
+                    />
+                </div>
+
+                <!-- Marketplace Posts -->
+                <div 
+                    v-if="activeTab === 'marketplace'"
+                    v-for="item in filteredItems" 
+                    :key="item.publicacion_marketplace_id"
+                    class="publication-item"
+                >
+                    <MyMarketplaceCard 
+                        :item="item"
+                        @edit="handleEditMarket"
+                        @delete="handleDeleteMarket"
+                        @toggle-status="handleToggleStatusMarket"
                     />
                 </div>
             </div>
@@ -129,7 +186,7 @@
         />
         
         <LoadingStates 
-            v-if="publicaciones.length > 0 && !hasMorePages"
+            v-if="items.length > 0 && !hasMorePages"
             type="end"
         />
 
@@ -171,20 +228,24 @@ import { useAuthStore } from '../../../stores/authStore';
 import api from '../../../services/api';
 import LoadingStates from '../../../components/ui/posts/LoadingStates.vue';
 import MyPublicationCard from '../../../components/ui/posts/MyPublicationCard.vue';
+import MyMarketplaceCard from '../../../components/ui/marketplace/MyMarketplaceCard.vue';
 
 const router = useRouter();
 const toast = useToast();
 const auth = useAuthStore();
 
-const publicaciones = ref([]);
+const activeTab = ref('bikes'); // 'bikes' or 'marketplace'
+const items = ref([]);
 const loading = ref(false);
 const loadingMore = ref(false);
 const hasSearched = ref(false);
 const paginationData = ref(null);
 const deleting = ref(false);
 const showDeleteModal = ref(false);
-const publicacionToDelete = ref(null);
+const itemToDelete = ref(null);
 const togglingStatus = ref(false);
+const bikesTotal = ref(0);
+const marketTotal = ref(0);
 
 const activeStatusFilter = ref('all');
 const sortBy = ref('created_at');
@@ -198,61 +259,85 @@ const filters = reactive({
 });
 
 const stats = computed(() => {
-    const active = publicaciones.value.filter(p => p.is_active && p.approved && !isExpired(p.fecha_vencimiento)).length;
-    const pending = publicaciones.value.filter(p => !p.approved).length;
-    const expired = publicaciones.value.filter(p => isExpired(p.fecha_vencimiento)).length;
+    const active = items.value.filter(item => {
+        if (activeTab.value === 'bikes') {
+            return item.is_active && item.approved && !isExpired(item.fecha_vencimiento);
+        } else {
+            return item.is_active && item.approved;
+        }
+    }).length;
+    
+    const pending = items.value.filter(item => !item.approved).length;
+    
+    const expired = activeTab.value === 'bikes' 
+        ? items.value.filter(item => isExpired(item.fecha_vencimiento)).length
+        : 0;
     
     return {
         active,
         pending, 
         expired,
-        total: publicaciones.value.length
+        total: items.value.length
     };
 });
 
-const statusFilters = computed(() => [
-    { 
-        label: 'Todas', 
-        value: 'all', 
-        icon: 'bi bi-collection',
-        count: stats.value.total
-    },
-    { 
-        label: 'Activas', 
-        value: 'active', 
-        icon: 'bi bi-check-circle',
-        count: stats.value.active
-    },
-    { 
-        label: 'Pendientes', 
-        value: 'pending', 
-        icon: 'bi bi-clock',
-        count: stats.value.pending
-    },
-    { 
-        label: 'Expiradas', 
-        value: 'expired', 
-        icon: 'bi bi-x-circle',
-        count: stats.value.expired
+const statusFilters = computed(() => {
+    const filters = [
+        { 
+            label: 'Todas', 
+            value: 'all', 
+            icon: 'bi bi-collection',
+            count: stats.value.total
+        },
+        { 
+            label: 'Activas', 
+            value: 'active', 
+            icon: 'bi bi-check-circle',
+            count: stats.value.active
+        },
+        { 
+            label: 'Pendientes', 
+            value: 'pending', 
+            icon: 'bi bi-clock',
+            count: stats.value.pending
+        }
+    ];
+    
+    // Only add expired filter for bikes tab
+    if (activeTab.value === 'bikes') {
+        filters.push({ 
+            label: 'Expiradas', 
+            value: 'expired', 
+            icon: 'bi bi-x-circle',
+            count: stats.value.expired
+        });
     }
-]);
+    
+    return filters;
+});
 
 const hasMorePages = computed(() => {
     return paginationData.value && paginationData.value.current_page < paginationData.value.last_page;
 });
 
-const filteredPublicaciones = computed(() => {
-    let filtered = [...publicaciones.value];
+const filteredItems = computed(() => {
+    let filtered = [...items.value];
     
     switch (activeStatusFilter.value) {
         case 'active':
-            filtered = filtered.filter(p => p.is_active && p.approved && !isExpired(p.fecha_vencimiento));
+            if (activeTab.value === 'bikes') {
+                filtered = filtered.filter(item => item.is_active && item.approved && !isExpired(item.fecha_vencimiento));
+            } else {
+                filtered = filtered.filter(item => item.is_active && item.approved);
+            }
             break;
         case 'pending':
-            filtered = filtered.filter(p => !p.approved);
+            filtered = filtered.filter(item => !item.approved);
             break;
         case 'expired':
-            filtered = filtered.filter(p => isExpired(p.fecha_vencimiento));
+            if (activeTab.value === 'bikes') {
+                filtered = filtered.filter(item => isExpired(item.fecha_vencimiento));
+            }
             break;
         default:
             break;
@@ -262,52 +347,67 @@ const filteredPublicaciones = computed(() => {
 });
 
 const isExpired = (fechaVencimiento) => {
+    if (!fechaVencimiento) return false;
     return new Date(fechaVencimiento) < new Date();
 };
 
 const getEmptyStateTitle = () => {
+    const type = activeTab.value === 'bikes' ? 'publicaciones' : 'productos del mercado';
     switch (activeStatusFilter.value) {
-        case 'active': return 'No tienes publicaciones activas';
-        case 'pending': return 'No tienes publicaciones pendientes';
-        case 'expired': return 'No tienes publicaciones expiradas';
-        default: return 'No tienes publicaciones';
+        case 'active': return `No tienes ${type} activas`;
+        case 'pending': return `No tienes ${type} pendientes`;
+        case 'expired': return `No tienes ${type} expiradas`;
+        default: return `No tienes ${type}`;
     }
 };
 
 const getEmptyStateMessage = () => {
+    const type = activeTab.value === 'bikes' ? 'publicaciones' : 'productos';
     switch (activeStatusFilter.value) {
-        case 'active': return 'Tus publicaciones activas aparecerán aquí una vez aprobadas';
-        case 'pending': return 'No hay publicaciones esperando aprobación';
-        case 'expired': return 'Las publicaciones vencidas aparecerán aquí';
-        default: return 'Comienza creando tu primera publicación de motocicleta';
+        case 'active': return `Tus ${type} activas aparecerán aquí una vez aprobadas`;
+        case 'pending': return `No hay ${type} esperando aprobación`;
+        case 'expired': return `Las ${type} vencidas aparecerán aquí`;
+        default: return `Comienza creando tu primer ${activeTab.value === 'bikes' ? 'publicación de motocicleta' : 'producto del mercado'}`;
     }
 };
 
-const fetchPublicaciones = async (append = false) => {
+const fetchItems = async (append = false) => {
     try {
         if (!append) {
             loading.value = true;
-            publicaciones.value = [];
+            items.value = [];
         } else {
             loadingMore.value = true;
         }
 
         const params = buildQueryParams();
+        let response;
         
-        const response = await api.get(`/api/publicaciones?${params.toString()}`);
+        if (activeTab.value === 'bikes') {
+            response = await api.get(`/api/publicaciones?${params.toString()}`);
+        } else {
+            response = await api.get(`/api/marketplace?${params.toString()}`);
+        }
         
         if (append) {
-            publicaciones.value.push(...response.data.data);
+            items.value.push(...response.data.data);
         } else {
-            publicaciones.value = response.data.data;
+            items.value = response.data.data;
         }
         
         paginationData.value = extractPaginationData(response.data);
+        
+        // Update total counts
+        if (activeTab.value === 'bikes') {
+            bikesTotal.value = paginationData.value.total;
+        } else {
+            marketTotal.value = paginationData.value.total;
+        }
+        
         hasSearched.value = true;
         
-        
     } catch (error) {
-        console.error('Error fetching user publications:', error);
+        console.error('Error fetching publications:', error);
         toast.error('Error al cargar tus publicaciones');
     } finally {
         loading.value = false;
@@ -336,70 +436,42 @@ const extractPaginationData = (data) => ({
     to: data.to
 });
 
+const switchTab = async (tab) => {
+    if (activeTab.value !== tab) {
+        activeTab.value = tab;
+        activeStatusFilter.value = 'all';
+        filters.page = 1;
+        await fetchItems();
+    }
+};
+
 const setStatusFilter = async (filterValue) => {
     activeStatusFilter.value = filterValue;
     filters.page = 1;
-    await fetchPublicaciones();
+    await fetchItems();
 };
 
 const applyFilters = async () => {
     filters.sort_by = sortBy.value;
     filters.page = 1;
-    await fetchPublicaciones();
+    await fetchItems();
 };
 
 const loadMore = async () => {
     if (hasMorePages.value && !loadingMore.value) {
         filters.page++;
-        await fetchPublicaciones(true);
+        await fetchItems(true);
     }
 };
 
+// Bike post handlers
 const handleEdit = (publicacion) => {
-    console.log('🔧 Editing publication:', publicacion.publicacion_id);
     router.push(`/motos/publicacion/${publicacion.publicacion_id}/editar`);
 };
 
 const handleDelete = (publicacion) => {
-    console.log('🗑️ Preparing to delete publication:', publicacion.publicacion_id);
-    publicacionToDelete.value = publicacion;
+    itemToDelete.value = { type: 'bike', data: publicacion };
     showDeleteModal.value = true;
-};
-
-const confirmDelete = async () => {
-    if (!publicacionToDelete.value) return;
-    
-    try {
-        deleting.value = true;
-        console.log('🗑️ Deleting publication:', publicacionToDelete.value.publicacion_id);
-        
-        const response = await api.delete(`/api/publicaciones/${publicacionToDelete.value.publicacion_id}`);
-        
-        console.log('✅ Delete response:', response.data);
-        
-        // Remove from local array
-        const index = publicaciones.value.findIndex(p => p.publicacion_id === publicacionToDelete.value.publicacion_id);
-        if (index > -1) {
-            publicaciones.value.splice(index, 1);
-        }
-        
-        toast.success('Publicación eliminada exitosamente');
-        showDeleteModal.value = false;
-        publicacionToDelete.value = null;
-        
-    } catch (error) {
-        console.error('Error deleting publication:', error);
-        
-        if (error.response?.status === 404) {
-            toast.error('La publicación no existe o ya fue eliminada');
-        } else if (error.response?.status === 403) {
-            toast.error('No tienes permisos para eliminar esta publicación');
-        } else {
-            toast.error('Error al eliminar la publicación');
-        }
-    } finally {
-        deleting.value = false;
-    }
 };
 
 const handleToggleStatus = async (publicacion) => {
@@ -418,25 +490,83 @@ const handleToggleStatus = async (publicacion) => {
         
     } catch (error) {
         console.error('Error toggling publication status:', error);
-
-        if (error.response?.status === 404) {
-            toast.error('La publicación no existe');
-        } else if (error.response?.status === 403) {
-            toast.error('No tienes permisos para modificar esta publicación');
-        } else {
-            toast.error('Error al cambiar el estado de la publicación');
-        }
+        toast.error('Error al cambiar el estado de la publicación');
     } finally {
         togglingStatus.value = false;
     }
+};
+
+// Marketplace post handlers
+const handleEditMarket = (item) => {
+    router.push(`/mercado/publicacion/${item.publicacion_marketplace_id}/editar`);
+};
+
+const handleDeleteMarket = (item) => {
+    itemToDelete.value = { type: 'marketplace', data: item };
+    showDeleteModal.value = true;
+};
+
+const handleToggleStatusMarket = async (item) => {
+    try {
+        togglingStatus.value = true;
+        const newStatus = !item.is_active;
+        
+        const response = await api.put(`/api/marketplace/disable-enable/${item.publicacion_marketplace_id}/`, {
+            is_active: newStatus
+        });
+        
+        item.is_active = response.data.is_active;
+        
+        const statusText = newStatus ? 'activada' : 'desactivada';
+        toast.success(`Publicación ${statusText} exitosamente`);
+        
+    } catch (error) {
+        console.error('Error toggling marketplace status:', error);
+        toast.error('Error al cambiar el estado de la publicación');
+    } finally {
+        togglingStatus.value = false;
+    }
+};
+
+const confirmDelete = async () => {
+    if (!itemToDelete.value) return;
+    
+    try {
+        deleting.value = true;
+        
+        if (itemToDelete.value.type === 'bike') {
+            await api.delete(`/api/publicaciones/${itemToDelete.value.data.publicacion_id}`);
+            const index = items.value.findIndex(p => p.publicacion_id === itemToDelete.value.data.publicacion_id);
+            if (index > -1) items.value.splice(index, 1);
+        } else {
+            await api.delete(`/api/marketplace/${itemToDelete.value.data.publicacion_marketplace_id}`);
+            const index = items.value.findIndex(p => p.publicacion_marketplace_id === itemToDelete.value.data.publicacion_marketplace_id);
+            if (index > -1) items.value.splice(index, 1);
+        }
+        
+        toast.success('Publicación eliminada exitosamente');
+        showDeleteModal.value = false;
+        itemToDelete.value = null;
+        
+    } catch (error) {
+        console.error('Error deleting publication:', error);
+        toast.error('Error al eliminar la publicación');
+    } finally {
+        deleting.value = false;
+    }
+};
+
+const createMarketplacePost = () => {
+    router.push('/mercado/publicacion/crear');
 };
 
 watch(sortBy, (newSort) => {
     filters.sort_by = newSort;
     applyFilters();
 });
+
 onMounted(async () => {
-    await fetchPublicaciones();
+    await fetchItems();
 });
 </script>
 
@@ -449,7 +579,7 @@ onMounted(async () => {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
     padding-bottom: 1rem;
     border-bottom: 1px solid #e9ecef;
 }
@@ -470,6 +600,66 @@ onMounted(async () => {
 .header-content p {
     color: #6c757d;
     margin: 0;
+}
+
+.tab-switcher {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    padding: 0.25rem;
+    background: #f8f9fa;
+    border-radius: 10px;
+}
+
+.tab-btn {
+    flex: 1;
+    padding: 0.75rem 1.5rem;
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    color: #6c757d;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    position: relative;
+}
+
+.tab-btn i {
+    font-size: 1.1rem;
+}
+
+.tab-btn:hover {
+    background: rgba(220, 53, 69, 0.05);
+    color: #dc3545;
+}
+
+.tab-btn.active {
+    background: white;
+    color: #dc3545;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+.tab-count {
+    padding: 0.15rem 0.5rem;
+    background: #dc3545;
+    color: white;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    min-width: 24px;
+    text-align: center;
+}
+
+.tab-btn.active .tab-count {
+    background: #dc3545;
+}
+
+.tab-btn:not(.active) .tab-count {
+    background: #6c757d;
 }
 
 .stats-row {
@@ -695,6 +885,7 @@ onMounted(async () => {
     cursor: pointer;
     transition: all 0.3s ease;
     border-radius: 15px;
+    text-decoration: none;
 }
 
 .publish-btn:hover {
@@ -764,5 +955,42 @@ onMounted(async () => {
 .fade-modal-leave-from {
     opacity: 1;
     transform: scale(1);
+}
+
+@media (max-width: 768px) {
+    .header-section {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+    }
+    
+    .tab-switcher {
+        flex-direction: column;
+    }
+    
+    .tab-btn {
+        width: 100%;
+    }
+    
+    .stats-row {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .filters-section {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .filter-tabs {
+        justify-content: center;
+    }
+    
+    .filter-actions .form-select {
+        width: 100%;
+    }
+    
+    .publications-grid {
+        grid-template-columns: 1fr;
+    }
 }
 </style>
