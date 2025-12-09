@@ -2,6 +2,7 @@ import AdminMenu from "../../pages/adminPages/AdminMenu.vue"
 import AdminPostList from "../../pages/adminPages/AdminPostList.vue"
 import AdminPostDetail from "../../pages/adminPages/AdminPostDetail.vue"
 import AdminDashboard from "../../pages/adminPages/AdminDashboard.vue"
+import AdminMarketplaceDetail from "../../pages/adminPages/AdminMarketplaceDetail.vue"
 
 export const adminRoutes = [
     {
@@ -26,6 +27,12 @@ export const adminRoutes = [
         path: '/auth/admin/dashboard',
         name: 'Dashboard General (admin)',
         component: AdminDashboard,
+        meta: { requiresAuth: true }
+    },
+    {
+        path: '/auth/admin/marketplace/approve/:id',
+        name: 'Detalle de Producto (admin)',
+        component: AdminMarketplaceDetail,
         meta: { requiresAuth: true }
     }
 ]

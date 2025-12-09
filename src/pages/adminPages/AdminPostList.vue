@@ -1,5 +1,24 @@
 <template>
     <div class="admin-pending-posts">
+        <div class="tabs-container mb-4">
+            <button 
+                class="tab-btn" 
+                :class="{ active: activeTab === 'bikes' }"
+                @click="switchTab('bikes')"
+            >
+                <i class="bi bi-bicycle me-2"></i>
+                Publicaciones de Motos
+            </button>
+            <button 
+                class="tab-btn" 
+                :class="{ active: activeTab === 'marketplace' }"
+                @click="switchTab('marketplace')"
+            >
+                <i class="bi bi-shop me-2"></i>
+                Mercado
+            </button>
+        </div>
+
         <!-- Recent Activity Section -->
         <div class="recent-activity-section mb-4">
             <div class="d-flex justify-content-between align-items-center mb-3">
@@ -23,9 +42,9 @@
             <div v-else class="activity-list">
                 <div 
                     v-for="activity in recentApprovals" 
-                    :key="activity.comment_id" 
+                    :key="`${activeTab}-${activity.comment_id}`" 
                     class="activity-item"
-                    @click="goToPost(activity.publicacion_id)"
+                    @click="goToPost(activity)"
                 >
                     <div class="activity-avatar">
                         <img
@@ -58,26 +77,30 @@
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2 class="fw-bold text-danger mb-0">
                 <i class="bi bi-hourglass-split me-2"></i>
-                Publicaciones Pendientes de Aprobación
+                {{ activeTab === 'bikes' ? 'Publicaciones de Motos' : 'Productos del Mercado' }} Pendientes
             </h2>
             <span class="badge bg-danger fs-6">{{ paginationData?.total || 0 }} pendientes</span>
         </div>
 
-        <LoadingStates v-if="loading && publicaciones.length === 0" type="initial" />
+        <LoadingStates v-if="loading && items.length === 0" type="initial" />
 
-        <div v-if="!loading && publicaciones.length === 0" class="empty-state">
+        <div v-if="!loading && items.length === 0" class="empty-state">
             <div class="empty-icon mb-3">
                 <i class="bi bi-hourglass-split"></i>
             </div>
-            <h5>No hay publicaciones pendientes</h5>
-            <p class="text-muted">¡Buen trabajo! No hay publicaciones esperando aprobación.</p>
+            <h5>No hay {{ activeTab === 'bikes' ? 'publicaciones' : 'productos' }} pendientes</h5>
+            <p class="text-muted">¡Buen trabajo! No hay {{ activeTab === 'bikes' ? 'publicaciones' : 'productos' }} esperando aprobación.</p>
         </div>
 
-        <div v-if="publicaciones.length > 0" class="publications-list-horizontal" ref="scrollContainer"
+        <div v-if="items.length > 0" class="publications-list-horizontal" ref="scrollContainer"
             @scroll="handleScroll">
             <transition-group name="fade" tag="div" class="d-flex flex-row gap-3">
-                <AdminPublicacionCard v-for="publicacion in publicaciones" :key="publicacion.publicacion_id"
-                    :publicacion="publicacion" />
+                <component
+                    :is="activeTab === 'bikes' ? AdminPublicacionCard : AdminMarketplaceCard"
+                    v-for="item in items"
+                    :key="getItemKey(item)"
+                    v-bind="activeTab === 'bikes' ? { publicacion: item } : { item }"
+                />
             </transition-group>
             <div v-if="loadingMore" class="loading-more-indicator d-flex align-items-center justify-content-center">
                 <span class="spinner-border text-danger" style="width: 2rem; height: 2rem;"></span>
@@ -89,26 +112,30 @@
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h2 class="fw-bold text-danger mb-0">
                     <i class="bi bi-check-circle me-2"></i>
-                    Publicaciones Aprobadas
+                    {{ activeTab === 'bikes' ? 'Publicaciones de Motos' : 'Productos del Mercado' }} Aprobados
                 </h2>
-                <span class="badge bg-success fs-6">{{ approvedPaginationData?.total || 0 }} aprobadas</span>
+                <span class="badge bg-success fs-6">{{ approvedPaginationData?.total || 0 }} aprobados</span>
             </div>
 
-            <LoadingStates v-if="loadingApproved && approvedPublicaciones.length === 0" type="initial" />
+            <LoadingStates v-if="loadingApproved && approvedItems.length === 0" type="initial" />
 
-            <div v-if="!loadingApproved && approvedPublicaciones.length === 0" class="empty-state">
+            <div v-if="!loadingApproved && approvedItems.length === 0" class="empty-state">
                 <div class="empty-icon mb-3">
                     <i class="bi bi-check-circle"></i>
                 </div>
-                <h5>No hay publicaciones aprobadas</h5>
-                <p class="text-muted">Las publicaciones aprobadas aparecerán aquí.</p>
+                <h5>No hay {{ activeTab === 'bikes' ? 'publicaciones' : 'productos' }} aprobados</h5>
+                <p class="text-muted">Los {{ activeTab === 'bikes' ? 'publicaciones' : 'productos' }} aprobados aparecerán aquí.</p>
             </div>
 
-            <div v-if="approvedPublicaciones.length > 0" class="publications-list-horizontal" ref="approvedScrollContainer"
+            <div v-if="approvedItems.length > 0" class="publications-list-horizontal" ref="approvedScrollContainer"
                 @scroll="handleApprovedScroll">
                 <transition-group name="fade" tag="div" class="d-flex flex-row gap-3">
-                    <AdminPublicacionCard v-for="publicacion in approvedPublicaciones" :key="publicacion.publicacion_id"
-                        :publicacion="publicacion" />
+                    <component
+                        :is="activeTab === 'bikes' ? AdminPublicacionCard : AdminMarketplaceCard"
+                        v-for="item in approvedItems"
+                        :key="getItemKey(item)"
+                        v-bind="activeTab === 'bikes' ? { publicacion: item } : { item }"
+                    />
                 </transition-group>
                 <div v-if="loadingMoreApproved" class="loading-more-indicator d-flex align-items-center justify-content-center">
                     <span class="spinner-border text-success" style="width: 2rem; height: 2rem;"></span>
@@ -123,16 +150,18 @@ import { ref, computed, onMounted, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
 import api from '@/services/api';
 import AdminPublicacionCard from '../../components/ui/posts/AdminPublicacionCard.vue';
+import AdminMarketplaceCard from '../../components/ui/marketplace/AdminMarketplaceCard.vue';
 import LoadingStates from '@/components/ui/posts/LoadingStates.vue';
 
 const router = useRouter();
 
-const publicaciones = ref([]);
+const activeTab = ref('bikes');
+const items = ref([]);
 const loading = ref(false);
 const loadingMore = ref(false);
 const paginationData = ref(null);
 
-const approvedPublicaciones = ref([]);
+const approvedItems = ref([]);
 const loadingApproved = ref(false);
 const loadingMoreApproved = ref(false);
 const approvedPaginationData = ref(null);
@@ -163,10 +192,62 @@ const hasMoreApprovedPages = computed(() => {
     return approvedPaginationData.value && approvedPaginationData.value.current_page < approvedPaginationData.value.last_page;
 });
 
+const getItemKey = (item) => {
+    if (activeTab.value === 'bikes') {
+        return `bike-${item.publicacion_id}`;
+    } else {
+        return `market-${item.publicacion_marketplace_id}`;
+    }
+};
+
+const switchTab = async (tab) => {
+    if (activeTab.value === tab) return;
+    
+    activeTab.value = tab;
+    
+    // Reset pagination
+    filters.value.page = 1;
+    approvedFilters.value.page = 1;
+    
+    // Clear current data
+    items.value = [];
+    approvedItems.value = [];
+    
+    // Fetch new data
+    await Promise.all([
+        fetchRecentApprovals(),
+        fetchItems(),
+        fetchApprovedItems()
+    ]);
+    
+    await nextTick();
+    
+    // Check if we need to load more to fill the viewport
+    if (
+        scrollContainer.value &&
+        scrollContainer.value.scrollWidth <= scrollContainer.value.clientWidth &&
+        hasMorePages.value
+    ) {
+        loadMore();
+    }
+    
+    if (
+        approvedScrollContainer.value &&
+        approvedScrollContainer.value.scrollWidth <= approvedScrollContainer.value.clientWidth &&
+        hasMoreApprovedPages.value
+    ) {
+        loadMoreApproved();
+    }
+};
+
 const fetchRecentApprovals = async () => {
     loadingRecent.value = true;
     try {
-        const response = await api.get('/api/publicaciones/recent-approvals?comment_type=approval&per_page=5');
+        const endpoint = activeTab.value === 'bikes' 
+            ? '/api/publicaciones/recent-approvals'
+            : '/api/marketplace/recent-approvals';
+        
+        const response = await api.get(`${endpoint}?comment_type=approval&per_page=5`);
         recentApprovals.value = response.data.data;
     } catch (error) {
         console.error('Error fetching recent approvals:', error);
@@ -175,11 +256,11 @@ const fetchRecentApprovals = async () => {
     }
 };
 
-const fetchPublicaciones = async (append = false) => {
+const fetchItems = async (append = false) => {
     try {
         if (!append) {
             loading.value = true;
-            publicaciones.value = [];
+            items.value = [];
         } else {
             loadingMore.value = true;
         }
@@ -190,14 +271,17 @@ const fetchPublicaciones = async (append = false) => {
                 params.append(key, value);
             }
         });
-        console.log('Fetching publicaciones with params:', params.toString());
 
-        const response = await api.get(`/api/publicaciones?${params.toString()}`);
+        const endpoint = activeTab.value === 'bikes' 
+            ? '/api/publicaciones'
+            : '/api/marketplace';
+        
+        const response = await api.get(`${endpoint}?${params.toString()}`);
 
         if (append) {
-            publicaciones.value.push(...response.data.data);
+            items.value.push(...response.data.data);
         } else {
-            publicaciones.value = response.data.data;
+            items.value = response.data.data;
         }
 
         paginationData.value = {
@@ -216,11 +300,11 @@ const fetchPublicaciones = async (append = false) => {
     }
 };
 
-const fetchApprovedPublicaciones = async (append = false) => {
+const fetchApprovedItems = async (append = false) => {
     try {
         if (!append) {
             loadingApproved.value = true;
-            approvedPublicaciones.value = [];
+            approvedItems.value = [];
         } else {
             loadingMoreApproved.value = true;
         }
@@ -232,12 +316,16 @@ const fetchApprovedPublicaciones = async (append = false) => {
             }
         });
 
-        const response = await api.get(`/api/publicaciones?${params.toString()}`);
+        const endpoint = activeTab.value === 'bikes' 
+            ? '/api/publicaciones'
+            : '/api/marketplace';
+
+        const response = await api.get(`${endpoint}?${params.toString()}`);
 
         if (append) {
-            approvedPublicaciones.value.push(...response.data.data);
+            approvedItems.value.push(...response.data.data);
         } else {
-            approvedPublicaciones.value = response.data.data;
+            approvedItems.value = response.data.data;
         }
 
         approvedPaginationData.value = {
@@ -259,21 +347,20 @@ const fetchApprovedPublicaciones = async (append = false) => {
 const loadMore = async () => {
     if (hasMorePages.value && !loadingMore.value) {
         filters.value.page++;
-        await fetchPublicaciones(true);
+        await fetchItems(true);
     }
 };
 
 const loadMoreApproved = async () => {
     if (hasMoreApprovedPages.value && !loadingMoreApproved.value) {
         approvedFilters.value.page++;
-        await fetchApprovedPublicaciones(true);
+        await fetchApprovedItems(true);
     }
 };
 
 function handleScroll() {
     const el = scrollContainer.value;
     if (!el || loadingMore.value || !hasMorePages.value) return;
-    // If scrolled to within 200px of the right end, load more
     if (el.scrollLeft + el.clientWidth >= el.scrollWidth - 200) {
         loadMore();
     }
@@ -282,14 +369,17 @@ function handleScroll() {
 function handleApprovedScroll() {
     const el = approvedScrollContainer.value;
     if (!el || loadingMoreApproved.value || !hasMoreApprovedPages.value) return;
-    // If scrolled to within 200px of the right end, load more
     if (el.scrollLeft + el.clientWidth >= el.scrollWidth - 200) {
         loadMoreApproved();
     }
 }
 
-function goToPost(publicacionId) {
-    router.push(`/auth/admin/publicaciones/approve/${publicacionId}`);
+function goToPost(activity) {
+    if (activeTab.value === 'bikes') {
+        router.push(`/auth/admin/publicaciones/approve/${activity.publicacion_id}`);
+    } else {
+        router.push(`/auth/admin/mercado/approve/${activity.publicacion_marketplace_id}`);
+    }
 }
 
 function getInitials(nombres, apellidos) {
@@ -343,8 +433,8 @@ function formatDate(dateStr) {
 onMounted(async () => {
     await Promise.all([
         fetchRecentApprovals(),
-        fetchPublicaciones(),
-        fetchApprovedPublicaciones()
+        fetchItems(),
+        fetchApprovedItems()
     ]);
     
     await nextTick();
@@ -370,6 +460,42 @@ onMounted(async () => {
 <style scoped>
 .admin-pending-posts {
     padding: 10px;
+}
+
+/* Tabs */
+.tabs-container {
+    display: flex;
+    gap: 0.5rem;
+    background: white;
+    padding: 0.5rem;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.tab-btn {
+    flex: 1;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    background: transparent;
+    color: #6c757d;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.tab-btn:hover {
+    background: #f8f9fa;
+    color: #dc3545;
+}
+
+.tab-btn.active {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    color: white;
+    box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
 }
 
 /* Recent Activity Section */
