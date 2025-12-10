@@ -31,3 +31,15 @@ body {
     background-color: #f9f9f9;
   }
 }
+
+.mottos-btn {
+    background-color: #B70000;
+    outline-color: #B70000;
+    border-color: #B70000;
+}
+
+.mottos-btn:hover {
+    background-color: #930000;
+    outline-color: #930000;
+    border-color: #930000;
+}

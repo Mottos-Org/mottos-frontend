@@ -72,7 +72,7 @@
                     </label>
                     <v-select
                         v-model="formData.bike_type_id"
-                        :options="bikeTypesOptions"
+                        :options="filteredBikeTypes"
                         :reduce="option => option.bike_type_id"
                         label="nombre_tipo"
                         placeholder="Seleccionar tipo..."
@@ -130,11 +130,12 @@
 
 <script setup>
 import vSelect from 'vue-select';
+import { computed } from 'vue';
 
 const selectedBrand = defineModel('selectedBrand');
 const selectedModel = defineModel('selectedModel');
 
-defineProps({
+const props = defineProps({
     formData: Object,
     errors: Object,
     brandsOptions: {
@@ -154,6 +155,20 @@ defineProps({
 });
 
 defineEmits(['brand-search', 'brand-selected', 'model-selected']);
+
+// Filter bike types based on selected model
+const filteredBikeTypes = computed(() => {
+    if (!selectedModel.value) {
+        // If no model selected, show all standard types (modelo_id = null)
+        return props.bikeTypesOptions.filter(type => type.modelo_id === null);
+    }
+    
+    // If model selected, show standard types + types for this model
+    const modelId = selectedModel.value.modelo_id;
+    return props.bikeTypesOptions.filter(
+        type => type.modelo_id === null || type.modelo_id === modelId
+    );
+});
 </script>
 
 <style scoped>

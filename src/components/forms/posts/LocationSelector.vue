@@ -49,6 +49,15 @@
         </div>
         <h6>No tienes direcciones guardadas</h6>
         <p>Puedes agregar una nueva dirección para futuras publicaciones</p>
+        <div class="add-address-section">
+          <button
+            @click="showAddAddress = !showAddAddress"
+            class="btn btn-outline-primary btn-sm add-address-btn"
+          >
+            <i class="bi bi-plus-circle"></i>
+            Agregar dirección
+          </button>
+        </div>
       </div>
 
       <div v-if="userAddresses.length > 0" class="add-address-section">

@@ -229,8 +229,8 @@ const onSave = async () => {
     toast.error('Usuario no autenticado');
     return;
   }
-  if (!localForm.calle || !localForm.provincia_id || !localForm.municipio_id) {
-    toast.error('Completa al menos provincia, municipio y la calle');
+  if (!localForm.provincia_id || !localForm.municipio_id) {
+    toast.error('Completa al menos la provincia y municipio.');
     return;
   }
 
