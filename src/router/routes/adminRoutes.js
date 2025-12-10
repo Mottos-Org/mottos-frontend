@@ -3,6 +3,7 @@ import AdminPostList from "../../pages/adminPages/AdminPostList.vue"
 import AdminPostDetail from "../../pages/adminPages/AdminPostDetail.vue"
 import AdminDashboard from "../../pages/adminPages/AdminDashboard.vue"
 import AdminMarketplaceDetail from "../../pages/adminPages/AdminMarketplaceDetail.vue"
+import AdminUserVerificationList from "../../pages/adminPages/AdminUserVerificationList.vue"
 
 export const adminRoutes = [
     {
@@ -33,6 +34,12 @@ export const adminRoutes = [
         path: '/auth/admin/marketplace/approve/:id',
         name: 'Detalle de Producto (admin)',
         component: AdminMarketplaceDetail,
+        meta: { requiresAuth: true }
+    },
+    {
+        path: '/auth/admin/documentos',
+        name: 'Autorización de Documentos',
+        component: AdminUserVerificationList,
         meta: { requiresAuth: true }
     }
 ]

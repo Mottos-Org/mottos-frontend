@@ -50,7 +50,13 @@ const adminOptions = [
         icon: 'bi bi-flag',
         description: 'Visualiza y gestiona reportes de contenido o usuarios.',
         to: '/admin/reportes'
-    }
+    },
+    {
+        title: 'Autorización de Documentos',
+        icon: 'bi bi-shield-check',
+        description: 'Revisa y aprueba/rechaza documentos de identidad.',
+        to: '/auth/admin/documentos'
+    },
 ];
 </script>
 
