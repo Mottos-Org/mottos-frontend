@@ -378,7 +378,7 @@ function goToPost(activity) {
     if (activeTab.value === 'bikes') {
         router.push(`/auth/admin/publicaciones/approve/${activity.publicacion_id}`);
     } else {
-        router.push(`/auth/admin/mercado/approve/${activity.publicacion_marketplace_id}`);
+        router.push(`/auth/admin/marketplace/approve/${activity.publicacion_marketplace_id}`);
     }
 }
 
