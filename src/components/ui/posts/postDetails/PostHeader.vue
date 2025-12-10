@@ -16,6 +16,17 @@
                 </button>
             </div>
         </div>
+
+        <div class="price-container">
+            <div class="price-section">
+                <span class="currency">{{ currency }}</span>
+                <span class="price">{{ formattedPrice }}</span>
+            </div>
+            <div class="price-note">
+                <i class="bi bi-info-circle"></i>
+                <span>Precio publicado{{ isNegotiable ? ' (Negociable)' : '' }}</span>
+            </div>
+        </div>
         
         <div class="details-grid">
             <div class="detail-item year-item">
@@ -36,17 +47,6 @@
                     <span class="detail-label">Ubicación</span>
                     <span class="detail-value">{{ location }}</span>
                 </div>
-            </div>
-        </div>
-        
-        <div class="price-container">
-            <div class="price-section">
-                <span class="currency">{{ currency }}</span>
-                <span class="price">{{ formattedPrice }}</span>
-            </div>
-            <div class="price-note">
-                <i class="bi bi-info-circle"></i>
-                <span>Precio publicado</span>
             </div>
         </div>
     </div>
@@ -72,6 +72,10 @@ const props = defineProps({
     postOwnerId: {
         type: [String, Number],
         required: false
+    },
+    isNegotiable: {
+        type: Boolean,
+        default: false
     }
 });
 
@@ -245,6 +249,7 @@ const handleEdit = () => {
     border-radius: 16px;
     padding: 20px;
     position: relative;
+    margin-bottom: 16px;
 }
 
 .price-section {

@@ -92,6 +92,7 @@ import { useToast } from 'vue-toastification';
 import api from '../../../services/api';
 import { useAuthStore } from '../../../stores/authStore';
 import AddUserAddressForm from '../user/AddUserAddressForm.vue';
+import { formatLocation } from '../../../utils/formatUtils';
 
 const props = defineProps({
   selectedLocation: {
@@ -145,17 +146,6 @@ const loadUserAddresses = async () => {
 
 const selectAddress = (addressId) => {
   emit('location-selected', addressId);
-};
-
-const formatLocation = (address) => {  
-  const parts = [];
-  
-  if (address.sector) parts.push(address.sector.nombre_sector);
-  if (address.municipio) parts.push(address.municipio.nombre_municipio);
-  if (address.provincia) parts.push(address.provincia.nombre_provincia);
-  if (address.pais) parts.push(address.pais.nombre_pais);
-  
-  return parts.length > 0 ? parts.join(', ') : 'República Dominicana';
 };
 
 const onAddressSaved = async (resData) => {

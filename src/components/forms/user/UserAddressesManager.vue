@@ -64,7 +64,7 @@
     </div>
 
     <transition name="slide-fade" mode="out-in">
-      <div v-if="showForm" class="card p-3 mb-3" key="form">
+      <div v-if="showForm" class="mb-3" key="form">
         <AddUserAddressForm
           :existing-addresses="addresses"
           :initial="editing ? {

@@ -2,7 +2,9 @@
     <nav class="navbar-container">
         <div class="top-side">
             <div class="logo" style="margin-left: 7.5%">
-                <img src="/mottos-logo.png" alt="Mottos" class="logo-image" />
+                <a href="/motos/publicaciones">
+                    <img src="/mottos-logo.png" alt="Mottos" class="logo-image" />
+                </a>
             </div>
             <motion.button class="hamburger" :whileHover="{ scale: 1.1 }" :whilePress="{ scale: 0.95 }"
                 @click="showMobileMenu = !showMobileMenu">
@@ -57,6 +59,7 @@ const moduleLinks = ref([
     { path: '/motos/publicaciones', label: 'PUBLICACIONES' },
     { path: '/mercado/publicaciones', label: 'MERCADO' },
     { path: '/noticias', label: 'NOTICIAS' },
+    { path: '/clubes', label: 'CLUBES' },
     { path: '/eventos', label: 'EVENTOS' },
 ]);
 

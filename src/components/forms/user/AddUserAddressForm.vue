@@ -1,5 +1,14 @@
 <template>
   <div class="card p-3">
+    <div class="help-warnings">
+      <ul>
+        <li>Las direcciones se utilizan para mostrar la ubicación de tus anuncios y facilitar la comunicación con los compradores.</li>
+        <li>Se precavido con el detalle de las direcciones que agregas para proteger tu privacidad.</li>
+        <li>Puedes agregar, editar o eliminar direcciones en cualquier momento.</li>
+        <li>No es necesario dar una dirección exacta; una aproximación es suficiente.</li>
+      </ul>
+    </div>
+
     <div class="d-flex justify-content-between align-items-start mb-2">
       <h3 class="section-title mb-0">{{ editing ? 'Editar dirección' : 'Agregar nueva dirección' }}</h3>
       <button v-if="showClose" type="button" class="btn-close" @click="$emit('cancel')">
@@ -75,7 +84,10 @@
       </div>
 
       <div class="mb-2">
-        <label class="form-label">Sector (opcional)</label>
+        <div class="form-label-with-badge">
+          <label class="form-label">Sector</label>
+          <span class="badge-optional">Opcional</span>
+        </div>
         <v-select
           v-model="localForm.sector_id"
           :options="sectores"
@@ -88,8 +100,11 @@
       </div>
 
       <div class="mb-2">
-        <label class="form-label">Dirección (calle)</label>
-        <textarea class="form-control" rows="2" v-model="localForm.calle" placeholder="Ej: Nombre y número de la calle."></textarea>
+        <div class="form-label-with-badge">
+          <label class="form-label">Dirección</label>
+          <span class="badge-optional">Opcional</span>
+        </div>
+        <textarea class="form-control" rows="2" v-model="localForm.calle" placeholder="Ej: Nombre de la calle."></textarea>
       </div>
 
       <div class="d-flex gap-2 justify-content-end" style="margin-top: 1.5rem;">
@@ -284,4 +299,80 @@ const onSave = async () => {
 
 .section-title { font-size: 1.1rem; font-weight: 700; }
 .btn-close { background: none; border: none; color: #6c757d; }
+
+.form-label-with-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.form-label {
+  margin-bottom: 0;
+}
+
+.badge-optional {
+  background: linear-gradient(135deg, #d1d5db 0%, #e5e7eb 100%);
+  color: #4b5563;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.35rem 0.65rem;
+  border-radius: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: inline-block;
+}
+
+.help-warnings {
+    background: linear-gradient(135deg, #fef3c7 0%, #fef8f0 100%);
+    border: 2px solid #fbbf24;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    width: 100%;
+    text-align: left;
+    box-shadow: 0 4px 12px rgba(251, 191, 36, 0.1);
+}
+
+.help-warnings ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.help-warnings li {
+    color: #78350f;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin-bottom: 0.75rem;
+    padding-left: 1.75rem;
+    position: relative;
+    font-weight: 500;
+}
+
+.help-warnings li:last-child {
+    margin-bottom: 0;
+}
+
+.help-warnings li::before {
+    content: '✓';
+    position: absolute;
+    left: 0;
+    color: #d97706;
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+@media (max-width: 768px) {
+    .help-warnings {
+        padding: 1.25rem;
+        border-radius: 10px;
+    }
+
+    .help-warnings li {
+        font-size: 0.9rem;
+        margin-bottom: 0.6rem;
+        padding-left: 1.5rem;
+    }
+}
 </style>

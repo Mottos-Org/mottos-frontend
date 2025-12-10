@@ -5,7 +5,7 @@
                 <i class="bi bi-motorcycle"></i>
                 {{ isEditing ? 'Motocicleta de la Publicación' : 'Selecciona tu Motocicleta' }}
             </h3>
-            <p>{{ isEditing ? 'Esta es la moto que estás publicando' : 'Elige una de tus motos registradas o crea una nueva' }}</p>
+            <p>{{ isEditing ? 'Esta es la moto que estás publicando' : 'Elige una de tus motos de tu garaje o crea una nueva' }}</p>
         </div>
 
         <div v-if="isEditing && selectedBike" class="editing-bike-info">
@@ -58,7 +58,7 @@
             <div class="no-bikes-icon">
                 <i class="bi bi-plus-circle"></i>
             </div>
-            <h4>No tienes motos registradas</h4>
+            <h4>No tienes motos registradas en tu garaje</h4>
             <p>Para crear una publicación, primero necesitas registrar tu motocicleta</p>
             <button @click="$emit('create-new-bike')" class="btn btn-primary">
                 <i class="bi bi-plus"></i>
@@ -223,7 +223,11 @@ const soldBikes = computed(() => {
 });
 
 const handleBikeClick = (bike) => {
-    if (!bike.en_venta && !props.isEditing) {
+    if (props.selectedBike?.bike_id === bike.bike_id && !props.isEditing) {
+        emit('bike-selected', null);
+    } 
+
+    else if (!bike.en_venta && !props.isEditing) {
         emit('bike-selected', bike);
     }
 };

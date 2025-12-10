@@ -32,6 +32,7 @@
                         :price="post.precio"
                         :post-id="post.publicacion_id"
                         :post-owner-id="post.user.user_id"
+                        :is-negotiable="post.negociable"
                     />
 
                     <div class="description-section">
@@ -158,6 +159,7 @@ import ComponentSection from '../../components/ui/posts/postDetails/ComponentSec
 import InfoGrid from '../../components/ui/posts/postDetails/InfoGrid.vue';
 import SellerCard from '../../components/ui/posts/postDetails/SellerCard.vue';
 import LocationMap from '../../components/ui/posts/postDetails/LocationMap.vue';
+import { formatLocation } from '../../utils/formatUtils';
 
 const route = useRoute();
 const router = useRouter();
@@ -175,9 +177,8 @@ const postTitle = computed(() => {
 });
 
 const locationText = computed(() => {
-    if (!post.value?.ubicacion) return 'Santo Domingo';
-    const { municipio, provincia } = post.value.ubicacion;
-    return `${municipio?.nombre_municipio || ''}, ${provincia?.nombre_provincia || ''}`.replace(/^,\s*/, '');
+    const address = post.value?.ubicacion;
+    return formatLocation(address);
 });
 
 const engineSpecs = computed(() => {

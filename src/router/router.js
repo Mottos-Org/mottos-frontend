@@ -7,6 +7,7 @@ import { docRoutes } from './routes/docRoutes';
 import { bikeRoutes } from './routes/bikeRoutes';
 import { adminRoutes } from './routes/adminRoutes';
 import { marketplaceRoutes } from './routes/marketplaceRoutes';
+import { clubRoutes } from './routes/clubRoutes';
 import { useAuthStore } from '../stores/authStore'
 import { createRouter, createWebHistory } from 'vue-router'
 
@@ -20,6 +21,7 @@ const routes = [
     ...bikeRoutes,
     ...adminRoutes,
     ...marketplaceRoutes,
+    ...clubRoutes,
     { path: '/:pathMatch(.*)*', name: 'NotFound', component: NotFound },
 ]
 
