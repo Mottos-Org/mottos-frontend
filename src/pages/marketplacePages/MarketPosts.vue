@@ -1,7 +1,7 @@
 <template>
     <div class="container-fluid market-posts-page">
         <div class="page-header">
-            <h1>Marketplace de Mottos</h1>
+            <h1>Mottos Market</h1>
             <p class="subtitle">Encuentra repuestos, accesorios y piezas para tu motocicleta.</p>
         </div>
 
