@@ -12,18 +12,11 @@
                         Marca
                         <span class="required">*</span>
                     </label>
-                    <v-select
-                        v-model="selectedBrand"
-                        :options="brandsOptions"
-                        :loading="loadingBrands"
-                        placeholder="Seleccionar marca..."
-                        class="v-select-custom"
-                        :class="{ 'is-invalid': errors.marca_id }"
-                        @search="$emit('brand-search', $event)"
-                        @option:selected="$emit('brand-selected', $event)"
-                        label="nombre_marca"
-                        :reduce="brand => brand"
-                    >
+                    <v-select v-model="selectedBrand" :options="brandsOptions" :loading="loadingBrands"
+                        placeholder="Seleccionar marca..." class="v-select-custom"
+                        :class="{ 'is-invalid': errors.marca_id }" @search="$emit('brand-search', $event)"
+                        @option:selected="$emit('brand-selected', $event)" label="nombre_marca"
+                        :reduce="brand => brand">
                         <template #no-options>
                             Escriba para buscar marcas...
                         </template>
@@ -40,18 +33,10 @@
                         Modelo
                         <span class="required">*</span>
                     </label>
-                    <v-select
-                        v-model="selectedModel"
-                        :options="modelsOptions"
-                        :loading="loadingModels"
-                        placeholder="Seleccionar modelo..."
-                        class="v-select-custom"
-                        :class="{ 'is-invalid': errors.modelo_id }"
-                        :disabled="!selectedBrand"
-                        label="nombre_modelo"
-                        :reduce="model => model"
-                        @option:selected="$emit('model-selected', $event)"
-                    >
+                    <v-select v-model="selectedModel" :options="modelsOptions" :loading="loadingModels"
+                        placeholder="Seleccionar modelo..." class="v-select-custom"
+                        :class="{ 'is-invalid': errors.modelo_id }" :disabled="!selectedBrand" label="nombre_modelo"
+                        :reduce="model => model" @option:selected="$emit('model-selected', $event)">
                         <template #no-options>
                             {{ !selectedBrand ? 'Seleccione una marca primero' : 'No hay modelos disponibles' }}
                         </template>
@@ -70,15 +55,9 @@
                         Tipo de Moto
                         <span class="required">*</span>
                     </label>
-                    <v-select
-                        v-model="formData.bike_type_id"
-                        :options="filteredBikeTypes"
-                        :reduce="option => option.bike_type_id"
-                        label="nombre_tipo"
-                        placeholder="Seleccionar tipo..."
-                        class="v-select-custom"
-                        :class="{ 'is-invalid': errors.bike_type_id }"
-                    />
+                    <v-select v-model="formData.bike_type_id" :options="filteredBikeTypes"
+                        :reduce="option => option.bike_type_id" label="nombre_tipo" placeholder="Seleccionar tipo..."
+                        class="v-select-custom" :class="{ 'is-invalid': errors.bike_type_id }" />
                     <div v-if="errors.bike_type_id" class="invalid-feedback">
                         {{ errors.bike_type_id }}
                     </div>
@@ -91,15 +70,9 @@
                         Año
                         <span class="required">*</span>
                     </label>
-                    <input
-                        v-model="formData.year"
-                        type="number"
-                        class="form-control"
-                        :class="{ 'is-invalid': errors.year }"
-                        placeholder="2023"
-                        :min="1980"
-                        :max="new Date().getFullYear() + 1"
-                    />
+                    <input v-model="formData.year" type="number" class="form-control"
+                        :class="{ 'is-invalid': errors.year }" placeholder="2023" :min="1980"
+                        :max="new Date().getFullYear() + 1" />
                     <div v-if="errors.year" class="invalid-feedback">
                         {{ errors.year }}
                     </div>
@@ -112,15 +85,21 @@
                         Cilindraje
                         <span class="required">*</span>
                     </label>
-                    <input
-                        v-model="formData.displacement"
-                        type="text"
-                        class="form-control"
-                        :class="{ 'is-invalid': errors.displacement }"
-                        placeholder="600cc"
-                    />
+                    <input v-model="formData.displacement" type="text" class="form-control"
+                        :class="{ 'is-invalid': errors.displacement }" placeholder="600cc" />
                     <div v-if="errors.displacement" class="invalid-feedback">
                         {{ errors.displacement }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-3">
+                <div class="col-md-12">
+                    <div class="form-check" style="text-align: left">
+                        <input v-model="formData.modded" type="checkbox" class="form-check-input" id="modded" />
+                        <label class="form-check-label" for="modded">
+                            Es una motocicleta modificada
+                        </label>
                     </div>
                 </div>
             </div>
@@ -162,7 +141,7 @@ const filteredBikeTypes = computed(() => {
         // If no model selected, show all standard types (modelo_id = null)
         return props.bikeTypesOptions.filter(type => type.modelo_id === null);
     }
-    
+
     // If model selected, show standard types + types for this model
     const modelId = selectedModel.value.modelo_id;
     return props.bikeTypesOptions.filter(

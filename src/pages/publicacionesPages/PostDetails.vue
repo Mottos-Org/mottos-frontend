@@ -248,7 +248,7 @@ const generalSpecs = computed(() => {
         },
         { 
             label: 'Estado de Modificación', 
-            value: post.value.bike?.modded ? 'Modificada' : 'Original',
+            value: post.value.bike?.modded ? 'MODIFICADA' : 'ORIGINAL',
             class: post.value.bike?.modded ? 'status-badge modified' : 'status-badge original'
         }
     ];
@@ -495,13 +495,81 @@ onMounted(() => {
 }
 
 .status-badge.modified {
-    background-color: #fff3cd;
-    color: #856404;
+    background: linear-gradient(135deg, #ff9500 0%, #ffc107 100%);
+    color: white;
+    border: 3px solid #ff6b00;
+    padding: 12px 20px !important;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 1.05rem;
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 15px rgba(255, 107, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    display: inline-block;
+    transform: translateY(0);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: visible;
+    cursor: pointer;
+}
+
+.status-badge.modified::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -100%;
+    width: 100%;
+    height: calc(100% + 4px);
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    transition: left 0.6s ease;
+    z-index: 1;
+    border-radius: 10px;
+    pointer-events: none;
+}
+
+.status-badge.modified:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 8px 25px rgba(255, 107, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.status-badge.modified:hover::before {
+    left: 100%;
 }
 
 .status-badge.original {
-    background-color: #d4edda;
-    color: #155724;
+    background: linear-gradient(135deg, #00d084 0%, #28a745 100%);
+    color: white;
+    border: 3px solid #008c4a;
+    padding: 12px 20px !important;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 1.05rem;
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 15px rgba(0, 140, 74, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    display: inline-block;
+    transform: translateY(0);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: visible;
+    cursor: pointer;
+}
+
+.status-badge.original::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -100%;
+    width: 100%;
+    height: calc(100% + 4px);
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    transition: left 0.6s ease;
+    z-index: 1;
+    border-radius: 10px;
+    pointer-events: none;
+}
+
+.status-badge.original:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 8px 25px rgba(0, 140, 74, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.5);
 }
 
 @media (max-width: 768px) {
