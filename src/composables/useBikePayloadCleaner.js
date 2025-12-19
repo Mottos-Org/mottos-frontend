@@ -25,6 +25,7 @@ export function useBikePayloadCleaner() {
             engine: data.engine || '',
             power: data.power || '',
             torque: data.torque || '',
+            modded: data.modded,
             en_venta: data.en_venta,
             fuel_system: {},
             tires: [],

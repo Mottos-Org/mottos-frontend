@@ -42,6 +42,22 @@
                 </div>
             </div>
         </div>
+
+        <div class="row mt-3">
+            <div class="col-md-12">
+                <div class="form-check" style="text-align: left">
+                    <input
+                        v-model="formData.modded"
+                        type="checkbox"
+                        class="form-check-input"
+                        id="modded"
+                    />
+                    <label class="form-check-label" for="modded">
+                        Es una motocicleta modificada
+                    </label>
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 

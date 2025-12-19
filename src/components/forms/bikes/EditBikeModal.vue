@@ -128,6 +128,7 @@ const populateFormData = () => {
     formData.engine = props.bike.engine;
     formData.power = props.bike.power;
     formData.torque = props.bike.torque;
+    formData.modded = props.bike.modded || false;
     formData.top_speed = props.bike.top_speed;
     formData.cooling = props.bike.cooling;
     formData.frame = props.bike.frame;

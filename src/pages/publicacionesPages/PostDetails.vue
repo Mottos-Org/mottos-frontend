@@ -245,6 +245,11 @@ const generalSpecs = computed(() => {
             label: 'Estado de Venta', 
             value: post.value.bike?.en_venta ? 'Disponible' : 'No Disponible',
             class: post.value.bike?.en_venta ? 'status-badge active' : 'status-badge'
+        },
+        { 
+            label: 'Estado de Modificación', 
+            value: post.value.bike?.modded ? 'Modificada' : 'Original',
+            class: post.value.bike?.modded ? 'status-badge modified' : 'status-badge original'
         }
     ];
 });
@@ -487,6 +492,16 @@ onMounted(() => {
 
 .safety-list li:last-child {
     border-bottom: none;
+}
+
+.status-badge.modified {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.status-badge.original {
+    background-color: #d4edda;
+    color: #155724;
 }
 
 @media (max-width: 768px) {

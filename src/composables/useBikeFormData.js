@@ -10,6 +10,7 @@ export function useBikeFormData() {
         engine: '',
         power: '',
         torque: '',
+        modded: false,
         en_venta: false,
         fuel_system: {
             fuel_capacity: '',
